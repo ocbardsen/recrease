@@ -1,0 +1,1092 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recrease</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 8 L54 20 L32 32 L10 20Z' fill='%23e6bf86'/%3E%3Cpath d='M10 20 L32 32 L32 58 L10 46Z' fill='%23c88f4f'/%3E%3Cpath d='M54 20 L32 32 L32 58 L54 46Z' fill='%23a8713a'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f6f4ef; --panel:#fff; --ink:#1d1d1b; --muted:#6b6a64; --line:#e2dfd6;
+  --accent:#b4531f; --accent-ink:#fff; --ok:#2e7d4f; --warn:#b3261e; --cut:#e02020; --score:#1f4fd8; --engr:#1b8a3a; --card:#efece4;
+  --kraft1:#e0b57a; --kraft2:#c28b4c; --brand:#3a2412;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#171715;--panel:#222220;--ink:#efede6;--muted:#a09e94;--line:#3a3935;--accent:#e0824a;--accent-ink:#1a1a18;--ok:#6fcf97;--warn:#ff8a80;--cut:#ff5a5a;--score:#7aa2ff;--engr:#6fd28a;--card:#2b2a27;--kraft1:#b98a52;--kraft2:#946531}
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;overflow-x:hidden;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+.hero{background:linear-gradient(135deg,var(--kraft1),var(--kraft2));color:var(--brand);border-bottom:4px solid var(--brand);position:relative}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:4px;background:repeating-linear-gradient(90deg,var(--brand) 0 14px,transparent 14px 22px)}
+.hero-in{max-width:1100px;margin:0 auto;padding:18px 16px;display:flex;align-items:center;gap:16px}
+.logo{width:72px;height:72px;flex:none}
+.brand{flex:1;min-width:0}
+.brand h1{margin:0;font-size:2.3rem;line-height:1;font-weight:800;letter-spacing:-.03em}
+.brand h1 span{color:#fff;text-shadow:0 1px 0 rgba(58,36,18,.35)}
+.brand p{margin:6px 0 0;font-size:.95rem;max-width:62ch;opacity:.9}
+.lang{display:flex;border:2px solid var(--brand);border-radius:999px;overflow:hidden;flex:none}
+.lang button{border:0;background:transparent;color:var(--brand);font:700 .85rem system-ui;padding:6px 12px;cursor:pointer}
+.lang button[aria-pressed=true]{background:var(--brand);color:#f6e7cc}
+@media(max-width:620px){.hero-in{flex-wrap:wrap}.brand h1{font-size:1.8rem}.logo{width:56px;height:56px}}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 32px}
+.grid{display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start}
+@media(max-width:820px){.grid{grid-template-columns:1fr}}
+.grid>div{min-width:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.panel h2{font-size:.95rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 10px}
+.panel+.panel{margin-top:14px}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.row2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:2px}
+input[type=number],input[type=text],select{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:1rem}
+.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tab{flex:1;min-width:130px;padding:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;font-size:.95rem;cursor:pointer}
+.tab[aria-selected=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.hint{font-size:.8rem;color:var(--muted);margin:8px 0 0}
+.status{padding:10px 12px;border-radius:8px;background:var(--card);margin-bottom:10px;font-size:.92rem}
+.status.ok{border-left:4px solid var(--ok)}
+.status.bad{border-left:4px solid var(--warn)}
+.status.warn{border-left:4px solid #d9a400}
+.preview{background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:10px}
+.preview svg{width:100%;height:auto;max-height:520px;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.82rem;color:var(--muted);margin:8px 0}
+.legend i{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin-right:6px}
+button.dl,button.sm{background:var(--accent);color:var(--accent-ink);border:0;padding:11px 16px;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;margin:8px 8px 0 0}
+button.dl.sec,button.sm.sec{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+button.sm{padding:6px 10px;font-size:.85rem;margin:0 0 0 6px}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+td,th{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:500}
+.mono{font-variant-numeric:tabular-nums}
+.chk{display:flex;gap:8px;align-items:center;font-size:.9rem;margin-top:8px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.saved li{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);list-style:none}
+.saved ul{margin:0;padding:0}
+.inline{display:flex;gap:6px;margin-top:8px}
+.inline input{flex:1}
+h3{font-size:.95rem;margin:18px 0 6px}
+footer{max-width:1100px;margin:0 auto;padding:0 16px 40px;color:var(--muted);font-size:.8rem;display:flex;align-items:center;gap:8px}
+footer svg{width:22px;height:22px}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="hero-in">
+    <svg class="logo" viewBox="0 0 64 64" role="img" aria-label="Recrease">
+      <g transform="translate(32 33.5) scale(.9) translate(-32 -32)">
+        <path d="M55.8 15.4 A29 29 0 1 1 39.5 4" fill="none" stroke="#3a2412" stroke-width="3.6" stroke-linecap="round"/>
+        <path d="M38 -0.5 L47.5 6.2 L37 9.6 Z" fill="#3a2412" transform="translate(0 0.4)"/>
+        <path d="M32 12.25 L48.5 21.25 L32 30.25 L15.5 21.25 Z" fill="#e6bf86"/>
+        <path d="M15.5 21.25 L32 30.25 L32 49.75 L15.5 40.75 Z" fill="#c88f4f"/>
+        <path d="M48.5 21.25 L32 30.25 L32 49.75 L48.5 40.75 Z" fill="#a8713a"/>
+        <path d="M26.5 15.25 L43 24.25 L38.2 26.9 L21.7 17.9 Z" fill="#f3dcb4"/>
+        <path d="M15.5 21.25 L32 30.25 L48.5 21.25" fill="none" stroke="#3a2412" stroke-width="1" stroke-dasharray="2.2 1.8" opacity=".55"/>
+        <circle cx="32" cy="30.25" r="2.1" fill="#e5392b"/>
+      </g>
+    </svg>
+    <div class="brand">
+      <h1><span>Re</span>crease</h1>
+      <p data-i="tagline"></p>
+    </div>
+    <div class="lang" role="group" aria-label="Language / Språk">
+      <button id="langNb" aria-pressed="false">NO</button>
+      <button id="langEn" aria-pressed="true">EN</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <div>
+      <div class="panel" id="sheetPanel">
+        <h2 data-i="h_sheet"></h2>
+        <label class="chk" style="margin-top:0"><input type="checkbox" id="useSheet" checked> <span data-i="useSheet"></span></label>
+        <div id="sheetBody">
+          <p class="hint" data-i="sheetHint"></p>
+          <div class="row2" style="margin-top:8px">
+            <div><label for="sW" data-i="sW"></label><input type="number" id="sW" min="50" step="5" value="500"></div>
+            <div><label for="sH" data-i="sH"></label><input type="number" id="sH" min="50" step="5" value="1000"></div>
+          </div>
+          <div class="row2" style="margin-top:8px">
+            <div><label for="cx" data-i="cx"></label><input type="text" id="cx" value="150, 350"></div>
+            <div><label for="cy" data-i="cy"></label><input type="text" id="cy" value="210, 440, 690"></div>
+          </div>
+          <p class="hint" style="margin-bottom:0" data-i="edgeHint"></p>
+          <div class="row2" style="margin-top:4px">
+            <div><label for="eL" data-i="eL"></label><input type="number" id="eL" min="0" step="1" value="0"></div>
+            <div><label for="eR" data-i="eR"></label><input type="number" id="eR" min="0" step="1" value="0"></div>
+            <div><label for="eT" data-i="eT"></label><input type="number" id="eT" min="0" step="1" value="0"></div>
+            <div><label for="eB" data-i="eB"></label><input type="number" id="eB" min="0" step="1" value="0"></div>
+          </div>
+          <div class="row2" style="margin-top:8px">
+            <div><label for="mg" data-i="mg"></label><input type="number" id="mg" min="0" step="1" value="8"></div>
+          </div>
+          <label class="chk"><input type="checkbox" id="cross"> <span data-i="cross"></span></label>
+          <label class="chk"><input type="checkbox" id="reuse" checked> <span data-i="reuse"></span></label>
+          <div id="reuseOpts">
+            <label class="chk"><input type="checkbox" id="dropOld" checked> <span data-i="dropOld"></span></label>
+            <div class="row2" style="margin-top:8px"><div><label for="xh" data-i="xh"></label><input type="number" id="xh" min="0" step="5" value="40"></div></div>
+            <p class="hint" data-i="reuseHint"></p>
+          </div>
+          <p class="hint" data-i="crossHint"></p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 data-i="h_item"></h2>
+        <div class="row3">
+          <div><label for="iL" data-i="len"></label><input type="number" id="iL" min="1" step="1" value="200"></div>
+          <div><label for="iW" data-i="wid"></label><input type="number" id="iW" min="1" step="1" value="120"></div>
+          <div><label for="iH" data-i="hei"></label><input type="number" id="iH" min="1" step="1" value="80"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 data-i="h_mat"></h2>
+        <div class="row2">
+          <div><label for="t" data-i="thick"></label><input type="number" id="t" min="0.5" step="0.1" value="3"></div>
+          <div><label for="cl" data-i="clear"></label><input type="number" id="cl" min="0" step="0.5" value="2"></div>
+        </div>
+        <div id="boxOpts" class="row2" style="margin-top:8px">
+          <div id="lhBox"><label for="lh" data-i="lidH"></label><input type="number" id="lh" min="5" step="1" value="25"></div>
+          <div><label for="fl" data-i="tab"></label><input type="number" id="fl" min="5" step="1" value="15"></div>
+        </div>
+        <div class="row2" style="margin-top:8px">
+          <div><label for="bw" data-i="bedW"></label><input type="number" id="bw" value="430"></div>
+          <div><label for="bh" data-i="bedD"></label><input type="number" id="bh" value="390"></div>
+        </div>
+        <div id="insOpts"><label class="chk"><input type="checkbox" id="notch" checked> <span data-i="notch"></span></label></div>
+      </div>
+
+      <div class="panel" id="textPanel">
+        <h2 data-i="h_text"></h2>
+        <label for="txt" data-i="textLbl"></label>
+        <input type="text" id="txt" maxlength="40" data-iph="textPh">
+        <div class="row2" style="margin-top:8px">
+          <div><label for="th" data-i="letterH"></label><input type="number" id="th" min="4" step="1" value="15"></div>
+        </div>
+        <p class="hint" data-i="textHint"></p>
+      </div>
+
+      <div class="panel" id="outerPanel">
+        <h2 id="outerH2"></h2>
+        <label class="chk" id="outerChk" style="margin-top:0"><input type="checkbox" id="useOuter"> <span data-i="useOuter"></span></label>
+        <div id="outerBody" style="display:none">
+          <select id="boxSel" data-iaria="myBoxes"><option value=""></option></select>
+          <div class="row3" style="margin-top:8px">
+            <div><label for="oL" data-i="len"></label><input type="number" id="oL" min="1" step="1" value="380"></div>
+            <div><label for="oW" data-i="wid"></label><input type="number" id="oW" min="1" step="1" value="280"></div>
+            <div><label for="oH" data-i="hei"></label><input type="number" id="oH" min="1" step="1" value="250"></div>
+          </div>
+          <div class="inline"><input type="text" id="boxName" data-iph="boxNamePh"><button class="sm" id="saveBox" data-i="saveBox"></button><button class="sm sec" id="delBox" data-i="del"></button></div>
+          <p class="hint" data-i="outerHint"></p>
+          <label class="chk"><input type="checkbox" id="rot" checked> <span data-i="rot"></span></label>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" id="tabRsc" aria-selected="false" data-i="tabRsc"></button>
+        <button class="tab" role="tab" id="tabBox" aria-selected="true" data-i="tabBox"></button>
+        <button class="tab" role="tab" id="tabIns" aria-selected="false" data-i="tabIns"></button>
+      </div>
+      <div class="panel">
+        <div id="status"></div>
+        <div class="legend">
+          <span><i style="border-color:var(--engr)"></i><span data-i="legEngr"></span></span>
+          <span><i style="border-color:var(--score);border-top-style:dashed"></i><span data-i="legScore"></span></span>
+          <span><i style="border-color:var(--cut)"></i><span data-i="legCut"></span></span>
+        </div>
+        <div class="preview" id="preview"></div>
+        <div id="dlRow"></div>
+        <div id="details" style="margin-top:14px"></div>
+
+        <h3 data-i="h_settings"></h3>
+        <div id="settings"></div>
+        <p class="hint" data-i="settingsHint"></p>
+        <p class="hint" data-i="layersHint"></p>
+      </div>
+
+      <div class="panel" id="sheetResult">
+        <h2 data-i="h_sheetResult"></h2>
+        <div id="sheetOut"></div>
+      </div>
+
+      <div class="panel">
+        <h2 data-i="h_saved"></h2>
+        <div class="inline"><input type="text" id="saveName" data-iph="saveNamePh"><button class="sm" id="saveBtn" data-i="save"></button></div>
+        <div class="saved" id="savedList"></div>
+        <div style="margin-top:10px">
+          <button class="sm sec" id="expBtn" style="margin-left:0" data-i="exp"></button>
+          <button class="sm sec" id="impBtn" data-i="imp"></button>
+          <input type="file" id="impFile" accept="application/json" style="display:none">
+        </div>
+        <p class="hint" data-i="savedHint"></p>
+      </div>
+    </div>
+  </div>
+</div>
+<footer>
+  <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 8 L54 20 L32 32 L10 20Z" fill="#e6bf86"/><path d="M10 20 L32 32 L32 58 L10 46Z" fill="#c88f4f"/><path d="M54 20 L32 32 L32 58 L54 46Z" fill="#a8713a"/></svg>
+  <span data-i="footer"></span>
+</footer>
+
+<script>
+/* ---------- language / språk ---------- */
+// Every entry is [norwegian, english]. Functions take values and return a string.
+const T = {
+ tagline:['Gi gammel papp nytt liv. Lag SVG-filer til laseren din av utbrettede esker. Alle mål i millimeter.','Give old cardboard a second life. Make SVG files for your laser from flattened boxes. All dimensions in millimetres.'],
+ footer:['Recrease – laserkutt esker av gjenbrukt papp.','Recrease – laser-cut boxes from reused cardboard.'],
+ h_sheet:['1. Esken du gjenbruker som papp','1. The box you are reusing as cardboard'],
+ useSheet:['Bruk en utbrettet eske (f.eks. HelloFresh) som papp','Use a flattened box (e.g. HelloFresh) as the cardboard'],
+ sheetHint:['Legg esken flat og mål den. Tallene under er <b>anslått fra bildet</b> – bytt dem med målene på akkurat din eske.','Lay the box flat and measure it. The numbers below are <b>estimated from a photo</b> – replace them with the measurements of your own box.'],
+ sW:['Arkbredde (mm)','Sheet width (mm)'], sH:['Arklengde (mm)','Sheet length (mm)'],
+ cx:['Loddrette bretter (mm fra venstre)','Vertical creases (mm from left)'],
+ cy:['Vannrette bretter (mm fra toppen)','Horizontal creases (mm from top)'],
+ edgeHint:['<b>Kuttede ytterkanter:</b> Hvis de ytterste flikene er kuttet av, skriv inn hvor mye som mangler fra hver kant (0 = hel kant). Målene over er arket slik det var før kuttet.','<b>Cut-off edges:</b> If the outermost flaps have been cut off, enter how much is missing from each edge (0 = intact edge). The measurements above describe the sheet as it was before cutting.'],
+ eL:['Mangler fra venstre (mm)','Missing from left (mm)'], eR:['Mangler fra høyre (mm)','Missing from right (mm)'],
+ eT:['Mangler fra toppen (mm)','Missing from top (mm)'], eB:['Mangler fra bunnen (mm)','Missing from bottom (mm)'],
+ mg:['Margin mot brett/kant (mm)','Margin to crease/edge (mm)'],
+ cross:['Tillat deler over eksisterende bretter','Allow parts across existing creases'],
+ reuse:['Gjenbruk eksisterende bretter (fanen «Eske i ett stykke»)','Reuse existing creases (“One-piece box” tab)'],
+ dropOld:['Ikke skrib bretter som allerede finnes',"Don't score creases that already exist"],
+ xh:['Maks ekstra veggehøyde (mm)','Max extra wall height (mm)'],
+ reuseHint:['Mål <b>alle</b> eksisterende bretter fra arkets øvre venstre hjørne og skriv dem inn over. Appen velger retning, plassering og veggehøyde så flest mulig av eskens bretter havner på brettene som finnes fra før, og viser brett som går på tvers av veggene.',"Measure <b>all</b> existing creases from the sheet's top-left corner and enter them above. The app picks orientation, position and wall height so that as many of the new box's creases as possible land on existing creases, and it flags creases that cross the walls."],
+ crossHint:['Uten avkrysning deles arket i felt mellom brettene, og delene legges i feltene uten å krysse en bretteline. Hvert felt klipper du ut og legger i laseren.','Unchecked, the sheet is divided into fields between the creases, and parts are placed in the fields without crossing a crease. You cut out each field and put it in the laser.'],
+ h_item:['2. Det som skal pakkes','2. What you are packing'],
+ len:['Lengde','Length'], wid:['Bredde','Width'], hei:['Høyde','Height'],
+ h_mat:['3. Papp og laser','3. Cardboard and laser'],
+ thick:['Papptykkelse','Cardboard thickness'],
+ clear:['Luft rundt gjenstand (per side)','Clearance around item (per side)'],
+ lidH:['Lokkhøyde','Lid height'], tab:['Limflik-bredde','Glue tab width'],
+ bedW:['Arbeidsflate bredde','Work area width'], bedD:['Arbeidsflate dybde','Work area depth'],
+ notch:['Fingerhakk i innlegget','Finger notch in the insert'],
+ h_text:['4. Tekst på lokket','4. Text on the lid'],
+ textLbl:['Tekst (graveres som enkel strek)','Text (engraved as a single line)'],
+ textPh:['F.eks. JULEGAVE','E.g. GIFT'],
+ letterH:['Bokstavhøyde (mm)','Letter height (mm)'],
+ textHint:['Støtter A–Å, tall og . , - ! ? / + :. Teksten ligger på laserens side av pappen, som havner utenpå når du bretter veggene bort fra deg.','Supports A–Z (plus Æ Ø Å), digits and . , - ! ? / + :. The text sits on the laser side of the cardboard, which ends up on the outside when you fold the walls away from you.'],
+ h_outer:['5. Ytterkartong (valgfritt)','5. Outer carton (optional)'],
+ h_outerIns:['5. Esken innlegget skal ligge i','5. The box the insert goes in'],
+ useOuter:['Esken skal ligge i en annen eske – sjekk at den passer','The box will go inside another box – check that it fits'],
+ myBoxes:['Mine esker – velg lagret','My boxes – pick a saved one'],
+ boxNamePh:['Navn, f.eks. HelloFresh stor','Name, e.g. HelloFresh large'],
+ saveBox:['Lagre eske','Save box'], del:['Slett','Delete'],
+ outerHint:['Mål innsiden av ytterkartongen med klaffene brettet opp. Lagre den, så slipper du å måle igjen.',"Measure the inside of the outer carton with the flaps folded up. Save it so you don't have to measure again."],
+ rot:['Tillat å snu esken 90° i ytterkartongen','Allow rotating the box 90° inside the carton'],
+ tabRsc:['Eske i ett stykke','One-piece box'], tabBox:['Eske med løst lokk','Box with separate lid'], tabIns:['Innlegg / polstring','Insert / padding'],
+ legEngr:['Tekst (graver)','Text (engrave)'], legScore:['Brett (skrib)','Fold (score)'], legCut:['Kutt','Cut'],
+ h_settings:['Forslag til innstillinger (xTool D1 Pro 10W)','Suggested settings (xTool D1 Pro 10W)'],
+ settingsHint:['Dette er <b>utgangspunkt</b>, ikke fasit – bølgepapp varierer mye. Lag en liten testrute (f.eks. 5 striper med ulik hastighet) på en pappbit først. Bruk luftassist, løft pappen opp fra bunnplaten (honeycomb), teip den fast, og la aldri laseren stå uten tilsyn – papp kan ta fyr.','These are a <b>starting point</b>, not gospel – corrugated cardboard varies a lot. Make a small test grid (e.g. 5 stripes at different speeds) on a scrap piece first. Use air assist, lift the cardboard off the bed (honeycomb), tape it down, and never leave the laser unattended – cardboard can catch fire.'],
+ layersHint:['SVG-en har tre lag med egne farger: <b>Tekst</b> (grønn), <b>Brett</b> (blå) og <b>Kutt</b> (rød). Kjør dem i den rekkefølgen, så kutt kommer sist og delene ikke flytter seg.',"The SVG has three layers with their own colours: <b>Engrave</b> (green), <b>Score</b> (blue) and <b>Cut</b> (red). Run them in that order so cutting comes last and the parts don't move."],
+ h_sheetResult:['Utskjæring fra utbrettet eske','Cutting from the flattened box'],
+ h_saved:['Lagrede esker','Saved boxes'],
+ saveNamePh:['Navn på denne eska','Name for this box'], save:['Lagre','Save'],
+ exp:['Eksporter (backup)','Export (backup)'], imp:['Importer','Import'],
+ savedHint:['Lagres i denne nettleseren. Ta en backup med Eksporter hvis du rydder nettleserdata.','Saved in this browser. Make a backup with Export if you clear your browser data.'],
+ /* dynamic */
+ fillAll:['Fyll inn alle mål.','Fill in all measurements.'],
+ calcOnly:[(a,b,c)=>`<b>Eske beregnet.</b> Ferdig størrelse utvendig ca. ${a} × ${b} × ${c} mm.`,(a,b,c)=>`<b>Box calculated.</b> Finished size outside approx. ${a} × ${b} × ${c} mm.`],
+ fitsBox:[(a,b,c)=>`<b>Passer i esken din.</b> Luft igjen: ${a} mm lengde, ${b} mm bredde, ${c} mm høyde. Fyll gjerne med sammenkrøllet papir eller et innlegg.`,(a,b,c)=>`<b>Fits in your box.</b> Room left: ${a} mm length, ${b} mm width, ${c} mm height. Fill with crumpled paper or an insert if you like.`],
+ fitsRsc:[(a,b,c)=>`<b>Passer i esken din.</b> Luft igjen: ${a} mm lengde, ${b} mm bredde, ${c} mm høyde.`,(a,b,c)=>`<b>Fits in your box.</b> Room left: ${a} mm length, ${b} mm width, ${c} mm height.`],
+ bigBox:[x=>`<b>Innerboksen er for stor</b> for esken din – den mangler ${x} mm. Reduser luft eller lokkhøyde, eller bruk en større eske.`,x=>`<b>The inner box is too big</b> for your box – it is ${x} mm short. Reduce clearance or lid height, or use a bigger box.`],
+ bigRsc:[x=>`<b>Esken er for stor</b> for ytteresken din – den mangler ${x} mm.`,x=>`<b>The box is too big</b> for your outer carton – it is ${x} mm short.`],
+ boxBed:[b=>`<br>⚠ Eske eller lokk er større enn arbeidsflaten (${b}) – bruk en mindre gjenstand eller utvid flaten.`,b=>`<br>⚠ The box or lid is larger than the work area (${b}) – use a smaller item or extend the work area.`],
+ apart:['<br>Delene er for store til å ligge på samme ark – last ned eske og lokk hver for seg.','<br>The parts are too large to fit together on one sheet – download box and lid separately.'],
+ txtNoLid:['<br>⚠ Teksten får ikke plass på lokket (under 4 mm bokstavhøyde). Kort den ned.','<br>⚠ The text does not fit on the lid (below 4 mm letter height). Shorten it.'],
+ txtNoWall:['<br>⚠ Teksten får ikke plass på veggen (under 4 mm bokstavhøyde). Kort den ned.','<br>⚠ The text does not fit on the wall (below 4 mm letter height). Shorten it.'],
+ txtShrunk:[h=>`<br>Teksten ble krympet til ${h} mm for å få plass.`,h=>`<br>The text was shrunk to ${h} mm to fit.`],
+ dlBoth:['Last ned SVG (eske + lokk)','Download SVG (box + lid)'], dlBox:['Bare eske','Box only'], dlLid:['Bare lokk','Lid only'],
+ dlOne:['Last ned SVG','Download SVG'],
+ dlIns:['Last ned SVG (ramme + heldekkende)','Download SVG (frame + solid)'], dlFrame:['Bare ramme','Frame only'], dlSolid:['Bare heldekkende','Solid only'],
+ thPart:['Del','Part'], thSize:['Mål (mm)','Size (mm)'], thQty:['Antall','Quantity'],
+ totalLayout:['Utlegg totalt','Total layout'], sheetWord:['pappåt','cardboard sheet'],
+ pBase:['Eske (bunn)','Box (base)'], pLid:['Lokk','Lid'], pInside:['innvendig','inside'],
+ pOuter:['Ferdig eske utvendig','Finished box, outside'], pOuterApprox:['Ferdig eske utvendig (ca.)','Finished box, outside (approx.)'],
+ pWalls:['Veggpaneler (4 stk)','Wall panels (4)'],
+ pWallsDim:[(a,b,h)=>`${a} og ${b} brede, ${h} høye`,(a,b,h)=>`${a} and ${b} wide, ${h} high`],
+ pFold:['brettes rundt','fold around'], pFlaps:['Klaffer topp og bunn','Top and bottom flaps'],
+ pFlapDim:[f=>`${f} høye`,f=>`${f} high`], pMeet:['møtes i midten','meet in the middle'],
+ rscBig:[(w,h,b)=>`<br>⚠ Utlegget (${w} × ${h} mm) er større enn arbeidsflaten (${b}). Bruk en mindre gjenstand, eller del arket i felt med arkplanleggeren.`,(w,h,b)=>`<br>⚠ The layout (${w} × ${h} mm) is larger than the work area (${b}). Use a smaller item, or divide the sheet into fields with the sheet planner.`],
+ rscFold:[t=>`<p class="hint"><b>Slik brettes den:</b> Brett de fire veggene rundt (bort fra deg, så teksten havner utenpå), og lim den lille flika innvendig på første vegg. Brett så klaffene inn: de to på de korte sidene først, deretter de to lange øverst. Samme prinsipp som HelloFresh-esken. Hver veggpanel er ${t} mm bredere enn gjenstanden (pappens tykkelse), og veggene er dobbelt så mye høyere, for å ta opp tykkelsen. Gjør en prøve i tynn papp først.</p>`,t=>`<p class="hint"><b>How to fold it:</b> Fold the four walls around (away from you, so the text ends up on the outside) and glue the small tab to the inside of the first wall. Then fold in the flaps: the two on the short sides first, then the two long ones on top. Same principle as the HelloFresh box. Each wall panel is wider than the item by the cardboard thickness (${t} mm), and the walls are taller by twice that, to absorb the thickness. Make a test piece from thin cardboard first.</p>`],
+ insTall:['Gjenstanden er høyere enn esken.','The item is taller than the box.'],
+ insEdge:[(a,b,c,d)=>`Gjenstanden (${a}×${b}) går nesten helt ut til kanten av esken (${c}×${d}) – plata blir svak. Vurder en annen løsning.`,(a,b,c,d)=>`The item (${a}×${b}) reaches almost to the edge of the box (${c}×${d}) – the plate will be weak. Consider another solution.`],
+ insOk:[(n,b,f,t)=>`<b>${n} lag papp</b> fyller esken: ${b} bunn-lag, ${f} rammelag rundt gjenstanden og ${t} topp-lag.`,(n,b,f,t)=>`<b>${n} layers of cardboard</b> fill the box: ${b} bottom layers, ${f} frame layers around the item and ${t} top layers.`],
+ insMuch:['<br>Det er mye papp. Du trenger ikke fylle hele høyden – mål hvor mye polstring du faktisk trenger og reduser «høyde» på esken.',"<br>That is a lot of cardboard. You don't need to fill the whole height – measure how much padding you actually need and reduce the box “height”."],
+ insBed:[b=>`<br>⚠ Platene er større enn arbeidsflaten (${b}).`,b=>`<br>⚠ The plates are larger than the work area (${b}).`],
+ thPlate:['Plate','Plate'], frameCut:['Ramme med utsparing','Frame with cut-out'], solidPlate:['Heldekkende plate','Solid plate'],
+ hole:['hull','hole'], pcs:['stk','pcs'],
+ stack:[(b,t)=>`Stable: ${b} heldekkende nederst, så rammene, så ${t} heldekkende øverst. Lim lagene sammen eller la dem ligge løst.`,(b,t)=>`Stack: ${b} solid plates at the bottom, then the frames, then ${t} solid plates on top. Glue the layers together or leave them loose.`],
+ lbl_box:['Eske','Box'], lbl_lid:['Lokk','Lid'], lbl_frame:['Ramme','Frame'], lbl_plate:['Heldekkende plate','Solid plate'],
+ lyr_engr:['Tekst','Engrave'], lyr_score:['Brett','Score'], lyr_cut:['Kutt','Cut'],
+ md_engr:['Graver/linje','Engrave/line'], md_score:['Linje (skrib)','Line (score)'], md_cut:['Linje (kutt)','Line (cut)'],
+ setHead:[['Lag','Modus','Effekt','Hastighet','Gjennomkjøringer'],['Layer','Mode','Power','Speed','Passes']],
+ passes3:['3 eller flere (vurder tynnere papp)','3 or more (consider thinner cardboard)'],
+ setNote:[t=>`Gjelder ca. ${t} mm bølgepapp. Brett skal bare skjære gjennom det øverste laget – øk hastigheten hvis det brenner for dypt, senk den hvis brettet sprekker dårlig.`,t=>`For about ${t} mm corrugated cardboard. Score lines should only cut through the top layer – increase the speed if it burns too deep, lower it if the fold cracks badly.`],
+ /* sheet planner */
+ shFill:['Fyll inn arkmål.','Enter the sheet measurements.'],
+ shNone:['<b>Ingen deler får plass</b> i feltene på arket.','<b>No parts fit</b> in the fields on the sheet.'],
+ shNeeds:[(n,p)=>`<b>Trenger ${n} utbrettet${n>1?' esker':' eske'}.</b> Delene bruker ca. ${p} % av arket.`,(n,p)=>`<b>Needs ${n} flattened ${n>1?'boxes':'box'}.</b> The parts use about ${p}% of the sheet.`],
+ shTooBig:[l=>`<br>⚠ For store for feltene eller laseren: ${l}.`,l=>`<br>⚠ Too large for the fields or the laser: ${l}.`],
+ shTryCross:[' Prøv «Tillat deler over eksisterende bretter», eller velg en mindre gjenstand.',' Try “Allow parts across existing creases”, or pick a smaller item.'],
+ shCap:['<br>Bare de 300 første delene er planlagt.','<br>Only the first 300 parts were planned.'],
+ shShow:['Vis ark','Show sheet'], shSheetN:[(i,n)=>`Ark ${i} av ${n}`,(i,n)=>`Sheet ${i} of ${n}`],
+ shField:[i=>`Felt ${i}`,i=>`Field ${i}`],
+ shPos:[(x,y,r)=>`${x} fra venstre, ${y} fra topp${r?' (roter 90°)':''}`,(x,y,r)=>`${x} from left, ${y} from top${r?' (rotate 90°)':''}`],
+ shParts:[n=>`${n} ${n>1?'deler':'del'}`,n=>`${n} part${n>1?'s':''}`],
+ thFieldPart:['Del / felt','Part / field'], thTopLeft:['Øvre venstre hjørne på arket','Top-left corner on the sheet'],
+ shHint:['Legg arket (eller feltet) i laseren slik at punktet i tabellen havner i øvre venstre hjørne av arbeidsflaten, og kjør SVG-en for den delen. Er feltet større enn laseren, får hver del sin egen fil og plassering på arket, så du flytter bare pappen mellom kjøringene. Stiplede grå linjer er eksisterende bretter.','Place the sheet (or field) in the laser so the point in the table lands in the top-left corner of the work area, and run the SVG for that part. If a field is larger than the laser, each part gets its own file and position on the sheet, so you only move the cardboard between runs. Dashed grey lines are existing creases.'],
+ reEnter:['Skriv inn minst én eksisterende bretteline for å gjenbruke bretter.','Enter at least one existing crease line to reuse creases.'],
+ reNoFit:['Utlegget får ikke plass på arket, selv med snudd retning. Bruk en mindre gjenstand eller et større ark.','The layout does not fit on the sheet, even rotated. Use a smaller item or a larger sheet.'],
+ reCount:[(n,a,p)=>`<b>Gjenbruker ${n} av ${a} bretter</b> (${p} % av brettelengden).`,(n,a,p)=>`<b>Reusing ${n} of ${a} creases</b> (${p}% of the crease length).`],
+ reLock:[(h,x)=>` Veggene er ${h} mm høye, tilpasset arkets bretter (${x} mm høyere enn nødvendig).`,(h,x)=>` Walls are ${h} mm high, matched to the sheet's creases (${x} mm taller than necessary).`],
+ reFree:[h=>` Veggene er ${h} mm høye – ingen eksisterende bretter passer til høyden din innenfor «maks ekstra».`,h=>` Walls are ${h} mm high – no existing creases match your height within “max extra”.`],
+ reRot:[' Utlegget er snudd 90° på arket.',' The layout is rotated 90° on the sheet.'],
+ reStrays:[l=>`<br>⚠ Disse eksisterende brettene går på tvers av veggene og kan gi svake eller skjeve flater: ${l}.`,l=>`<br>⚠ These existing creases run across the walls and may give weak or crooked surfaces: ${l}.`],
+ reFromLeft:[c=>`${c} mm fra venstre`,c=>`${c} mm from left`], reFromTop:[c=>`${c} mm fra toppen`,c=>`${c} mm from top`],
+ reNoMatch:['<br>Ingen av brettene traff – sjekk at målene på arket stemmer.','<br>None of the creases matched – check that the sheet measurements are correct.'],
+ reSplit:['<br>⚠ Utlegget må deles midt i en vegg for å passe i laseren – lim eller teip skjøten, eller bruk en mindre gjenstand.','<br>⚠ The layout must be split in the middle of a wall to fit in the laser – glue or tape the seam, or use a smaller item.'],
+ reLegend:['Grønne tykke linjer = brett som gjenbrukes. Grå stiplede = eksisterende bretter. Oransje stiplede firkanter = delene som kjøres i laseren.','Thick green lines = creases that are reused. Grey dashed = existing creases. Orange dashed rectangles = the parts that run in the laser.'],
+ rePart:[i=>`Del ${i}`,i=>`Part ${i}`], thCorner:['Hjørne på arket','Corner on the sheet'],
+ reHint:[r=>`Legg arket i laseren slik at punktet i tabellen havner i øvre venstre hjørne av arbeidsflaten${r?' (<b>roter pappen 90° med klokka</b> først)':''}. Delene er delt langs eksisterende bretter, så brettelinjen ligger langs kanten av laserfeltet, uten krav til nøyaktig justering. Kjør delene hver for seg. Tegn eller teip en markering på arket mellom kjøringene.`,r=>`Place the sheet in the laser so the point in the table lands in the top-left corner of the work area${r?' (<b>rotate the cardboard 90° clockwise</b> first)':''}. The parts are split along existing creases, so the crease line lies along the edge of the laser field, with no need for exact alignment. Run the parts one at a time. Draw or tape a mark on the sheet between runs.`],
+ /* saved */
+ kindBox:['eske','box'], kindIns:['innlegg','insert'], open:['Åpne','Open'],
+ noSaved:['Ingen lagrede esker ennå.','No saved boxes yet.'], defName:['Eske','Box'],
+ alertSave:['Kunne ikke lagre i nettleseren. Bruk Eksporter i stedet.','Could not save in the browser. Use Export instead.'],
+ alertRead:['Kunne ikke lese filen.','Could not read the file.']
+};
+const $ = id => document.getElementById(id);
+const num = id => parseFloat($(id).value) || 0;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } };
+let lang = 'en';
+try { const sv = localStorage.getItem('recrease_lang'); lang = sv ? JSON.parse(sv) : (/^(nb|nn|no)/i.test(navigator.language||'') ? 'nb' : 'en'); } catch(e){}
+if(lang!=='nb' && lang!=='en') lang='en';
+const li = () => lang==='nb' ? 0 : 1;
+const t = (k, ...a) => { const e=T[k]; if(!e) return '['+k+']'; const v=e[li()]; return typeof v==='function' ? v(...a) : v; };
+const f1 = v => { const s=(Math.round(v*10)/10).toString(); return lang==='nb' ? s.replace('.',',') : s; };
+function applyLang(){
+  document.documentElement.lang = lang==='nb' ? 'nb' : 'en';
+  document.title = lang==='nb' ? 'Recrease – eskemaker for laser' : 'Recrease – laser box maker';
+  document.querySelectorAll('[data-i]').forEach(el => { el.innerHTML = t(el.dataset.i); });
+  document.querySelectorAll('[data-iph]').forEach(el => { el.placeholder = t(el.dataset.iph); });
+  document.querySelectorAll('[data-iaria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.iaria)); });
+  $('langNb').setAttribute('aria-pressed', lang==='nb'); $('langEn').setAttribute('aria-pressed', lang==='en');
+}
+function setLang(l){ lang=l; lsSet('recrease_lang', l); applyLang(); renderSaved(); renderBoxes(); update(); }
+
+let mode = 'box';
+
+/* ---------- storage ---------- */
+const FIELD_IDS = ['oL','oW','oH','iL','iW','iH','t','cl','lh','fl','bw','bh','rot','notch','txt','th','useSheet','sW','sH','cx','cy','mg','cross','reuse','dropOld','xh','useOuter','eL','eR','eT','eB'];
+const getFields = () => Object.fromEntries(FIELD_IDS.map(id => [id, $(id).type==='checkbox' ? $(id).checked : $(id).value]));
+const setFields = o => { FIELD_IDS.forEach(id => { if(!(id in o)) return; if($(id).type==='checkbox') $(id).checked = !!o[id]; else $(id).value = o[id]; }); };
+
+/* ---------- geometry ---------- */
+const shiftPt = (dx,dy) => ([x,y]) => [x+dx, y+dy];
+const shift = (s, dx, dy) => ({
+  cut: s.cut.map(p => p.map(shiftPt(dx,dy))),
+  score: s.score.map(l => l.map(shiftPt(dx,dy))),
+  engrave: (s.engrave||[]).map(l => l.map(shiftPt(dx,dy))),
+  cutOpen: (s.cutOpen||[]).map(l => l.map(shiftPt(dx,dy))),
+  w: s.w, h: s.h,
+  base: s.base ? {...s.base, x:s.base.x+dx, y:s.base.y+dy} : undefined
+});
+
+// Flat layout of a folding tray: base L×W, walls H, glue tabs f on the long walls
+function tray(L, W, H, f){
+  f = Math.min(f, W/2, H*2);
+  const c = Math.min(f*0.5, H/4);
+  const P = [[H,0],[H+L,0],[H+L+f,c],[H+L+f,H-c],[H+L,H],[2*H+L,H],[2*H+L,H+W],[H+L,H+W],
+    [H+L+f,H+W+c],[H+L+f,2*H+W-c],[H+L,2*H+W],[H,2*H+W],[H-f,2*H+W-c],[H-f,H+W+c],[H,H+W],
+    [0,H+W],[0,H],[H,H],[H-f,H-c],[H-f,c]];
+  const score = [
+    [[H,H],[H+L,H]], [[H,H+W],[H+L,H+W]], [[H,H],[H,H+W]], [[H+L,H],[H+L,H+W]],
+    [[H,0],[H,H]], [[H+L,0],[H+L,H]], [[H,H+W],[H,2*H+W]], [[H+L,H+W],[H+L,2*H+W]]
+  ];
+  const xs = P.map(p=>p[0]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  return shift({cut:[P], score, engrave:[], w:x1-x0, h:2*H+W, base:{x:H,y:H,w:L,h:W}}, -x0, 0);
+}
+
+const rectPts = (x,y,w,h) => [[x,y],[x+w,y],[x+w,y+h],[x,y+h]];
+function plate(w, h, cw, ch, notch){
+  const cut = [rectPts(0,0,w,h)];
+  if(cw){
+    const x0=(w-cw)/2, y0=(h-ch)/2, x1=x0+cw, y1=y0+ch;
+    const r = Math.min(12, cw/4, (h-ch)/2-4);
+    if(notch && r>=3){
+      const cx=w/2, pts=[[x0,y0]];
+      for(let i=0;i<=12;i++){ const a=Math.PI*(1-i/12); pts.push([cx+r*Math.cos(a), y0-r*Math.sin(a)]); }
+      pts.push([x1,y0],[x1,y1]);
+      for(let i=0;i<=12;i++){ const a=Math.PI*(i/12); pts.push([cx+r*Math.cos(a), y1+r*Math.sin(a)]); }
+      pts.push([x0,y1]);
+      cut.push(pts);
+    } else cut.push(rectPts(x0,y0,cw,ch));
+  }
+  return {cut, score:[], engrave:[], w, h};
+}
+
+/* ---------- single-line font (grid 4 wide × 6 high) ---------- */
+const O_=[[1,0],[3,0],[4,1],[4,5],[3,6],[1,6],[0,5],[0,1],[1,0]];
+const P_=[[0,6],[0,0],[3,0],[4,1],[4,2],[3,3],[0,3]];
+const A_=[[0,6],[0,2],[2,0],[4,2],[4,6]];
+const G = {
+ 'A':[A_,[[0,3.5],[4,3.5]]],
+ 'B':[[[0,0],[0,6],[3,6],[4,5],[4,4],[3,3],[0,3]],[[3,3],[4,2],[4,1],[3,0],[0,0]]],
+ 'C':[[[4,1],[3,0],[1,0],[0,1],[0,5],[1,6],[3,6],[4,5]]],
+ 'D':[[[0,0],[0,6],[2,6],[4,4],[4,2],[2,0],[0,0]]],
+ 'E':[[[4,0],[0,0],[0,6],[4,6]],[[0,3],[3,3]]],
+ 'F':[[[4,0],[0,0],[0,6]],[[0,3],[3,3]]],
+ 'G':[[[4,1],[3,0],[1,0],[0,1],[0,5],[1,6],[3,6],[4,5],[4,3],[2,3]]],
+ 'H':[[[0,0],[0,6]],[[4,0],[4,6]],[[0,3],[4,3]]],
+ 'I':[[[1,0],[3,0]],[[2,0],[2,6]],[[1,6],[3,6]]],
+ 'J':[[[4,0],[4,5],[3,6],[1,6],[0,5]]],
+ 'K':[[[0,0],[0,6]],[[4,0],[0,3.5]],[[1.5,2.3],[4,6]]],
+ 'L':[[[0,0],[0,6],[4,6]]],
+ 'M':[[[0,6],[0,0],[2,3],[4,0],[4,6]]],
+ 'N':[[[0,6],[0,0],[4,6],[4,0]]],
+ 'O':[O_],
+ 'P':[P_],
+ 'Q':[O_,[[2.5,4.5],[4,6.5]]],
+ 'R':[P_,[[2,3],[4,6]]],
+ 'S':[[[4,1],[3,0],[1,0],[0,1],[0,2],[1,3],[3,3],[4,4],[4,5],[3,6],[1,6],[0,5]]],
+ 'T':[[[0,0],[4,0]],[[2,0],[2,6]]],
+ 'U':[[[0,0],[0,5],[1,6],[3,6],[4,5],[4,0]]],
+ 'V':[[[0,0],[2,6],[4,0]]],
+ 'W':[[[0,0],[1,6],[2,3],[3,6],[4,0]]],
+ 'X':[[[0,0],[4,6]],[[4,0],[0,6]]],
+ 'Y':[[[0,0],[2,3],[4,0]],[[2,3],[2,6]]],
+ 'Z':[[[0,0],[4,0],[0,6],[4,6]]],
+ 'Æ':[[[0,6],[3,0],[3,6]],[[3,0],[6,0]],[[3,3],[5.5,3]],[[3,6],[6,6]],[[1,4],[3,4]]],
+ 'Ø':[O_,[[0,6],[4,0]]],
+ 'Å':[A_,[[0,3.5],[4,3.5]],[[1.5,-0.8],[2.5,-0.8],[2.5,-2.2],[1.5,-2.2],[1.5,-0.8]]],
+ '0':[O_,[[1,4.5],[3,1.5]]],
+ '1':[[[1,1],[2,0],[2,6]],[[1,6],[3,6]]],
+ '2':[[[0,1],[1,0],[3,0],[4,1],[4,2],[0,6],[4,6]]],
+ '3':[[[0,0],[4,0],[2,2.5],[3,2.5],[4,3.5],[4,5],[3,6],[1,6],[0,5]]],
+ '4':[[[3,6],[3,0],[0,4],[4,4]]],
+ '5':[[[4,0],[0,0],[0,3],[3,3],[4,4],[4,5],[3,6],[1,6],[0,5]]],
+ '6':[[[4,1],[3,0],[1,0],[0,1],[0,5],[1,6],[3,6],[4,5],[4,4],[3,3],[0,3]]],
+ '7':[[[0,0],[4,0],[1.5,6]]],
+ '8':[[[1,0],[3,0],[4,1],[4,2],[3,3],[1,3],[0,2],[0,1],[1,0]],[[1,3],[0,4],[0,5],[1,6],[3,6],[4,5],[4,4],[3,3]]],
+ '9':[[[0,5],[1,6],[3,6],[4,5],[4,1],[3,0],[1,0],[0,1],[0,2],[1,3],[4,3]]],
+ '.':[[[2,5.4],[2,6]]], ',':[[[2,5.4],[1.6,7]]], '-':[[[0.5,3],[3.5,3]]],
+ '!':[[[2,0],[2,4]],[[2,5.4],[2,6]]], '?':[[[0,1],[1,0],[3,0],[4,1],[4,2],[2,3.5],[2,4.5]],[[2,5.4],[2,6]]],
+ '/':[[[0,6],[4,0]]], '+':[[[0,3],[4,3]],[[2,1],[2,5]]], ':':[[[2,1.4],[2,2]],[[2,4],[2,4.6]]]
+};
+const GW = {'Æ':6};
+function textShape(str, height){
+  const s = height/6, lines=[];
+  let x = 0;
+  for(const ch of str.toUpperCase()){
+    if(ch===' '){ x += 3*s; continue; }
+    const g = G[ch]; if(!g) continue;
+    g.forEach(st => lines.push(st.map(([gx,gy]) => [x+gx*s, gy*s])));
+    x += ((GW[ch]||4)+1.5)*s;
+  }
+  if(!lines.length) return null;
+  const pts = lines.flat();
+  const x0=Math.min(...pts.map(p=>p[0])), x1=Math.max(...pts.map(p=>p[0]));
+  const y0=Math.min(...pts.map(p=>p[1])), y1=Math.max(...pts.map(p=>p[1]));
+  return {engrave: lines.map(l=>l.map(([a,b])=>[a-x0,b-y0])), w:x1-x0, h:y1-y0};
+}
+// Place text in the middle of a tray's base; shrink if it doesn't fit
+function addText(shape, str, height){
+  if(!str.trim() || !shape.base) return {shape, shrunk:false, ok:true};
+  let T_ = textShape(str, height);
+  if(!T_) return {shape, shrunk:false, ok:true};
+  const availW = shape.base.w-12, availH = shape.base.h-12;
+  const k = Math.min(1, availW/T_.w, availH/T_.h);
+  let shrunk=false;
+  if(k<1){ if(k*height<4) return {shape, shrunk:false, ok:false}; T_ = textShape(str, height*k); shrunk=true; }
+  const dx = shape.base.x + (shape.base.w-T_.w)/2, dy = shape.base.y + (shape.base.h-T_.h)/2;
+  const out = {...shape, engrave:[...shape.engrave, ...T_.engrave.map(l=>l.map(shiftPt(dx,dy)))]};
+  return {shape:out, shrunk, ok:true, h:height*Math.min(1,k)};
+}
+
+/* ---------- SVG with layers (layer names stay English in the files) ---------- */
+function layersMarkup(shapes, preview){
+  const pd = p => 'M'+p.map(q=>q[0].toFixed(2)+' '+q[1].toFixed(2)).join('L')+'Z';
+  const ld = l => 'M'+l.map(q=>q[0].toFixed(2)+' '+q[1].toFixed(2)).join('L');
+  const cuts = shapes.flatMap(s=>s.cut).map(pd).concat(shapes.flatMap(s=>s.cutOpen||[]).map(ld)).join(' ');
+  const scs  = shapes.flatMap(s=>s.score).map(ld).join(' ');
+  const eng  = shapes.flatMap(s=>s.engrave||[]).map(ld).join(' ');
+  const sw = preview ? 'stroke-width="1.6" vector-effect="non-scaling-stroke"' : 'stroke-width="0.1"';
+  const C = preview ? {cut:'var(--cut)',score:'var(--score)',eng:'var(--engr)'} : {cut:'#ff0000',score:'#0000ff',eng:'#00a000'};
+  const dash = preview ? 'stroke-dasharray="6 4"' : '';
+  const layer = (id,label,d,col,extra) => d ? `<g id="${id}" inkscape:groupmode="layer" inkscape:label="${label}"><path d="${d}" stroke="${col}" ${sw} ${extra||''}/></g>` : '';
+  return layer('Engrave','Engrave',eng,C.eng)+layer('Score','Score',scs,C.score,dash)+layer('Cut','Cut',cuts,C.cut);
+}
+function toSVG(shapes, W, H, preview){
+  const size = preview ? '' : ` width="${W.toFixed(2)}mm" height="${H.toFixed(2)}mm"`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"${size} viewBox="-2 -12 ${(W+4).toFixed(2)} ${(H+16).toFixed(2)}">`+
+    `<g fill="none" stroke-linejoin="round" stroke-linecap="round">`+layersMarkup(shapes,preview)+`</g></svg>`;
+}
+
+function layout(shapes, bw, bh, gap=8){
+  const fits = (w,h) => (w<=bw && h<=bh) || (w<=bh && h<=bw);
+  const totW = shapes.reduce((a,s)=>a+s.w,0)+gap*(shapes.length-1);
+  const maxH = Math.max(...shapes.map(s=>s.h));
+  const maxW = Math.max(...shapes.map(s=>s.w));
+  const totH = shapes.reduce((a,s)=>a+s.h,0)+gap*(shapes.length-1);
+  const side = fits(totW,maxH), stack = fits(maxW,totH);
+  let out=[], W,H;
+  if(side || !stack){ let x=0; shapes.forEach(s=>{out.push(shift(s,x,0)); x+=s.w+gap;}); W=totW; H=maxH; }
+  else { let y=0; shapes.forEach(s=>{out.push(shift(s,0,y)); y+=s.h+gap;}); W=maxW; H=totH; }
+  return {shapes:out, W, H, fits:fits(W,H), eachFits:shapes.every(s=>fits(s.w,s.h))};
+}
+
+/* ---------- one-piece box (HelloFresh style, "RSC") ---------- */
+function rscNet(wL, wW, hh, tw, slot){
+  const f = wW/2 - 1, c = Math.min(4, f/4);
+  const xb = [0, wL, wL+wW, 2*wL+wW, 2*wL+2*wW], T_ = xb[4];
+  const span = i => [xb[i] + (i>0 ? slot/2 : 0), xb[i+1] - (i<3 ? slot/2 : 0)];
+  const P = [];
+  for(let i=0;i<4;i++){ const [a,b]=span(i); P.push([a,f],[a,c],[a+c,0],[b-c,0],[b,c],[b,f]); }
+  const tc = Math.min(6, tw/2);
+  P.push([T_,f+3],[T_+tw,f+3+tc],[T_+tw,f+hh-3-tc],[T_,f+hh-3]);
+  for(let i=3;i>=0;i--){ const [a,b]=span(i); P.push([b,f+hh],[b,2*f+hh-c],[b-c,2*f+hh],[a+c,2*f+hh],[a,2*f+hh-c],[a,f+hh]); }
+  const score = [[[0,f],[T_,f]], [[0,f+hh],[T_,f+hh]], [[xb[1],f],[xb[1],f+hh]], [[xb[2],f],[xb[2],f+hh]], [[xb[3],f],[xb[3],f+hh]], [[T_,f],[T_,f+hh]]];
+  return {cut:[P], score, engrave:[], w:T_+tw, h:2*f+hh, base:{x:0,y:f,w:wL,h:hh}};
+}
+function calcRsc(p){
+  const tk=p.t, wL=p.iL+2*p.cl+tk, wW=p.iW+2*p.cl+tk, hh=p.iH+p.cl+2*tk;
+  const slot=Math.max(2*tk,4);
+  const tx=addText(rscNet(wL,wW,hh,p.fl,slot), p.txt, p.th);
+  const A=tx.shape;
+  const lay=layout([A],p.bw,p.bh);
+  const outer=[p.iL+2*p.cl+2*tk, p.iW+2*p.cl+2*tk, hh+2*tk];
+  const opts=[[outer[0],outer[1]]]; if(p.rot) opts.push([outer[1],outer[0]]);
+  let best=null;
+  opts.forEach(o=>{ const sl=[p.oL-o[0], p.oW-o[1], p.oH-outer[2]]; const bad=Math.min(...sl); if(!best||bad>best.bad) best={o,s:sl,bad}; });
+  return {A,tx,lay,outer,best,parts:[
+    [t('pWalls'), t('pWallsDim',f1(wL),f1(wW),f1(hh)), t('pFold')],
+    [t('pFlaps'), t('pFlapDim',f1(wW/2-1)), t('pMeet')],
+    [t('pOuterApprox'), `${f1(outer[0])} × ${f1(outer[1])} × ${f1(outer[2])}`, ''],
+  ]};
+}
+
+/* ---------- calculation ---------- */
+function calcBox(p){
+  const iL=p.iL+2*p.cl, iW=p.iW+2*p.cl, bh=p.iH+p.cl;
+  const gap=1;
+  const lidL=iL+2*p.t+2*gap, lidW=iW+2*p.t+2*gap;
+  const A = tray(iL,iW,bh,p.fl);
+  const tx = addText(tray(lidL,lidW,p.lh,p.fl), p.txt, p.th);
+  const B = tx.shape;
+  const lay = layout([A,B], p.bw, p.bh);
+  const outer=[lidL+2*p.t, lidW+2*p.t, bh+2*p.t];
+  const opts=[[outer[0],outer[1]]]; if(p.rot) opts.push([outer[1],outer[0]]);
+  let best=null;
+  opts.forEach(o=>{
+    const s=[p.oL-o[0], p.oW-o[1], p.oH-outer[2]];
+    const bad=Math.min(...s);
+    if(!best || bad>best.bad) best={o,s,bad};
+  });
+  return {A,B,tx,lay,outer,best,parts:[
+    [t('pBase'), `${f1(iL)} × ${f1(iW)} × ${f1(bh)}`, t('pInside')],
+    [t('pLid'), `${f1(lidL)} × ${f1(lidW)} × ${f1(p.lh)}`, t('pInside')],
+    [t('pOuter'), `${f1(outer[0])} × ${f1(outer[1])} × ${f1(outer[2])}`, ''],
+  ]};
+}
+
+function calcIns(p){
+  const pw=p.oL-1, ph=p.oW-1;
+  const cw=p.iL+2*p.cl, chh=p.iW+2*p.cl;
+  const total=Math.floor(p.oH/p.t);
+  const nFrame=Math.ceil(p.iH/p.t);
+  const rem=total-nFrame;
+  const bottom=Math.max(0,Math.ceil(rem/2)), top=Math.max(0,rem-bottom);
+  const frame=plate(pw,ph,cw,chh,p.notch), solid=plate(pw,ph,0,0);
+  const lay=layout([frame,solid],p.bw,p.bh);
+  return {frame,solid,lay,pw,ph,cw,chh,total,nFrame,rem,bottom,top};
+}
+
+/* ---------- sheet planner (flattened box as material) ---------- */
+const GAP = 3;
+const rot90 = s => { const m=([x,y])=>[s.h-y, x];
+  return {cut:s.cut.map(p=>p.map(m)), score:s.score.map(l=>l.map(m)), engrave:(s.engrave||[]).map(l=>l.map(m)), cutOpen:(s.cutOpen||[]).map(l=>l.map(m)), w:s.h, h:s.w}; };
+const parseList = (str,max) => String(str).split(/[ ,;]+/).map(parseFloat).filter(v=>v>0&&v<max).sort((a,b)=>a-b);
+
+function sheetRegions(p){
+  const X0=p.eL, X1=p.sW-p.eR, Y0=p.eT, Y1=p.sH-p.eB;
+  const xs=[X0,...(p.cross?[]:parseList(p.cx,p.sW).filter(v=>v>X0&&v<X1)),X1], ys=[Y0,...(p.cross?[]:parseList(p.cy,p.sH).filter(v=>v>Y0&&v<Y1)),Y1];
+  const regs=[];
+  for(let i=0;i<xs.length-1;i++) for(let j=0;j<ys.length-1;j++){
+    const x0=xs[i]+p.mg, y0=ys[j]+p.mg, w=xs[i+1]-xs[i]-2*p.mg, h=ys[j+1]-ys[j]-2*p.mg;
+    if(w<20||h<20) continue;
+    regs.push({x:x0,y:y0,w,h});
+  }
+  return regs;
+}
+const contains=(b,a)=>a.x>=b.x&&a.y>=b.y&&a.x+a.w<=b.x+b.w&&a.y+a.h<=b.y+b.h;
+function packer(w,h){
+  return {free:[{x:0,y:0,w,h}],
+    place(pw,ph){
+      let best=null;
+      for(const f of this.free) for(const rot of [0,1]){
+        const a=rot?ph:pw, b=rot?pw:ph;
+        if(a<=f.w&&b<=f.h){ const sc=Math.min(f.w-a,f.h-b); if(!best||sc<best.sc) best={f,a,b,rot,sc}; }
+      }
+      if(!best) return null;
+      const r={x:best.f.x,y:best.f.y,w:best.a,h:best.b}, nf=[];
+      for(const f of this.free){
+        if(r.x>=f.x+f.w||r.x+r.w<=f.x||r.y>=f.y+f.h||r.y+r.h<=f.y){ nf.push(f); continue; }
+        if(r.x>f.x) nf.push({x:f.x,y:f.y,w:r.x-f.x,h:f.h});
+        if(r.x+r.w<f.x+f.w) nf.push({x:r.x+r.w,y:f.y,w:f.x+f.w-(r.x+r.w),h:f.h});
+        if(r.y>f.y) nf.push({x:f.x,y:f.y,w:f.w,h:r.y-f.y});
+        if(r.y+r.h<f.y+f.h) nf.push({x:f.x,y:r.y+r.h,w:f.w,h:f.y+f.h-(r.y+r.h)});
+      }
+      this.free=nf.filter((a,i)=>!nf.some((b,j)=>j!==i&&contains(b,a)&&(!contains(a,b)||j<i)));
+      return {x:r.x,y:r.y,rot:best.rot};
+    }};
+}
+function planSheets(pieces,p){
+  const tpl=sheetRegions(p);
+  const fitsBed=pc=>(pc.w<=p.bw&&pc.h<=p.bh)||(pc.h<=p.bw&&pc.w<=p.bh);
+  const fitsAny=pc=>fitsBed(pc)&&tpl.some(r=>(pc.w<=r.w&&pc.h<=r.h)||(pc.h<=r.w&&pc.w<=r.h));
+  let left=pieces.slice().sort((a,b)=>b.w*b.h-a.w*a.h);
+  const unplaceable=left.filter(pc=>!fitsAny(pc)); left=left.filter(fitsAny);
+  const sheets=[]; let guard=0;
+  while(left.length && guard++<80){
+    const sheet={regions:tpl.map(r=>({...r,pk:packer(r.w+GAP,r.h+GAP),placed:[]}))}, rest=[];
+    for(const pc of left){
+      let ok=false;
+      for(const rg of sheet.regions){
+        const pos=rg.pk.place(pc.w+GAP,pc.h+GAP);
+        if(pos){ rg.placed.push({pc,x:pos.x,y:pos.y,rot:pos.rot}); ok=true; break; }
+      }
+      if(!ok) rest.push(pc);
+    }
+    sheets.push(sheet); left=rest;
+  }
+  return {sheets,unplaceable,regions:tpl};
+}
+function lostMarkup(p){
+  const r=(x,y,w,h)=>w>0&&h>0?`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="var(--line)" opacity=".9"/>`:'';
+  return r(0,0,p.eL,p.sH)+r(p.sW-p.eR,0,p.eR,p.sH)+r(0,0,p.sW,p.eT)+r(0,p.sH-p.eB,p.sW,p.eB);
+}
+let sheetIdx=0, lastPlan=null, sheetDl=[];
+const placedShape=(pl)=>pl.rot?rot90(pl.pc.shape):pl.pc.shape;
+
+function renderSheet(p, pieces){
+  $('sheetResult').style.display = p.useSheet ? '' : 'none';
+  $('sheetBody').style.display = p.useSheet ? '' : 'none';
+  $('reuseOpts').style.display = p.reuse ? '' : 'none';
+  if(!p.useSheet){ $('sheetOut').innerHTML=''; lastPlan=null; return; }
+  if(p.reuse && mode==='rsc' && p.sW>0 && p.sH>0){ lastPlan=null; renderReuse(p); return; }
+  if(p.sW<=0||p.sH<=0||!pieces.length){ $('sheetOut').innerHTML=`<div class="status bad">${t('shFill')}</div>`; return; }
+  const items=pieces.slice(0,300).map(x=>({shape:x.shape,key:x.key,w:x.shape.w,h:x.shape.h}));
+  lastPlan={plan:planSheets(items,p),p,total:pieces.length,capped:pieces.length>300};
+  drawSheet();
+}
+function drawSheet(){
+  const {plan,p,capped}=lastPlan, sheets=plan.sheets, n=sheets.length;
+  if(sheetIdx>=n) sheetIdx=0;
+  const placedAll=sheets.flatMap(sh=>sh.regions.flatMap(r=>r.placed));
+  const used=placedAll.reduce((a,pl)=>a+pl.pc.w*pl.pc.h,0);
+  let msg='', cls='ok';
+  if(!placedAll.length){ cls='bad'; msg=t('shNone'); }
+  else msg=t('shNeeds', n, Math.round(100*used/(n*(p.sW-p.eL-p.eR)*(p.sH-p.eT-p.eB))));
+  if(plan.unplaceable.length){
+    cls='warn';
+    const cnt={}; plan.unplaceable.forEach(x=>cnt[x.key]=(cnt[x.key]||0)+1);
+    msg+=t('shTooBig', Object.entries(cnt).map(([k,v])=>`${v} × ${esc(t('lbl_'+k))}`).join(', '))+(p.cross?'':t('shTryCross'));
+  }
+  if(capped) msg+=t('shCap');
+  let html=`<div class="status ${cls}">${msg}</div>`;
+  if(!placedAll.length){ $('sheetOut').innerHTML=html; return; }
+  const sh=sheets[sheetIdx];
+  if(n>1) html+=`<label for="sheetSel">${t('shShow')}</label><select id="sheetSel">${sheets.map((_,i)=>`<option value="${i}"${i===sheetIdx?' selected':''}>${t('shSheetN',i+1,n)}</option>`).join('')}</select>`;
+  const all=[]; sh.regions.forEach(rg=>rg.placed.forEach(pl=>all.push(shift(placedShape(pl),rg.x+pl.x,rg.y+pl.y))));
+  const xs=p.cross?[]:parseList(p.cx,p.sW), ys=p.cross?[]:parseList(p.cy,p.sH);
+  const ln=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--muted)" stroke-dasharray="8 6" stroke-width="1.2" vector-effect="non-scaling-stroke"/>`;
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" viewBox="-6 -6 ${p.sW+12} ${p.sH+12}">`+
+    `<rect x="0" y="0" width="${p.sW}" height="${p.sH}" fill="var(--card)" stroke="var(--muted)" stroke-width="1.2" vector-effect="non-scaling-stroke"/>${lostMarkup(p)}`+
+    xs.map(x=>ln(x,0,x,p.sH)).join('')+ys.map(y=>ln(0,y,p.sW,y)).join('')+
+    sh.regions.map(r=>`<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="none" stroke="var(--muted)" stroke-dasharray="2 3" stroke-width="1" vector-effect="non-scaling-stroke" opacity=".6"/>`).join('')+
+    `<g fill="none" stroke-linejoin="round" stroke-linecap="round">${layersMarkup(all,true)}</g></svg>`;
+  html+=`<div class="preview" style="margin-top:8px">${svg}</div>`;
+  sheetDl=[]; let rows='';
+  const bedFit=(w,h)=>(w<=p.bw&&h<=p.bh)?1:((h<=p.bw&&w<=p.bh)?2:0);
+  const mergeShapes=(list,w,h)=>({cut:list.flatMap(x=>x.cut),score:list.flatMap(x=>x.score),engrave:list.flatMap(x=>x.engrave||[]),cutOpen:list.flatMap(x=>x.cutOpen||[]),w,h});
+  const addDl=(name,list,w,h)=>{ let m=mergeShapes(list,w,h); const rotn=bedFit(w,h)===2; if(rotn) m=rot90(m);
+    return {k:sheetDl.push({name,svg:toSVG([m],m.w,m.h,false)})-1, rotn}; };
+  sh.regions.forEach((rg,i)=>{
+    if(!rg.placed.length) return;
+    if(bedFit(rg.w,rg.h)){
+      const {k,rotn}=addDl(`sheet${sheetIdx+1}-field${i+1}.svg`, rg.placed.map(pl=>shift(placedShape(pl),pl.x,pl.y)), rg.w, rg.h);
+      rows+=`<tr><td>${t('shField',i+1)}</td><td class="mono">${f1(rg.w)} × ${f1(rg.h)}</td><td class="mono">${t('shPos',f1(rg.x),f1(rg.y),rotn)}</td><td>${t('shParts',rg.placed.length)}</td><td><button class="sm" data-dl="${k}">SVG</button></td></tr>`;
+    } else rg.placed.forEach((pl,n)=>{
+      const sh1=placedShape(pl);
+      const {k,rotn}=addDl(`sheet${sheetIdx+1}-${pl.pc.key}${n+1}.svg`,[sh1],sh1.w,sh1.h);
+      rows+=`<tr><td>${esc(t('lbl_'+pl.pc.key))}</td><td class="mono">${f1(sh1.w)} × ${f1(sh1.h)}</td><td class="mono">${t('shPos',f1(rg.x+pl.x),f1(rg.y+pl.y),rotn)}</td><td>${t('shParts',1)}</td><td><button class="sm" data-dl="${k}">SVG</button></td></tr>`;
+    });
+  });
+  html+=`<table style="margin-top:10px"><tr><th>${t('thFieldPart')}</th><th>${t('thSize')}</th><th>${t('thTopLeft')}</th><th></th><th></th></tr>${rows}</table>`+
+    `<p class="hint">${t('shHint')}</p>`;
+  $('sheetOut').innerHTML=html;
+}
+
+/* ---------- reuse of existing creases ---------- */
+function rscDims(p){ const tk=p.t; return {t:tk, wL:p.iL+2*p.cl+tk, wW:p.iW+2*p.cl+tk, hhNeed:p.iH+p.cl+2*tk, slot:Math.max(2*tk,4)}; }
+function lineSets(shape){
+  const v=[], h=[];
+  shape.score.forEach(([a,b])=>{
+    if(Math.abs(a[0]-b[0])<1e-6) v.push({x:a[0],len:Math.abs(a[1]-b[1])});
+    else if(Math.abs(a[1]-b[1])<1e-6) h.push({y:a[1],len:Math.abs(a[0]-b[0])});
+  });
+  return {v,h};
+}
+function planReuse(p){
+  const d=rscDims(p), tol=2, cxs=parseList(p.cx,p.sW), cys=parseList(p.cy,p.sH);
+  let best=null;
+  for(const orient of [0,1]){
+    const wallC = orient===0 ? cys : cxs;
+    const opts=[{hh:d.hhNeed,lock:false}];
+    for(let i=0;i<wallC.length;i++) for(let j=i+1;j<wallC.length;j++){
+      const hh=wallC[j]-wallC[i];
+      if(hh>=d.hhNeed-0.01 && hh<=d.hhNeed+p.xh && !opts.some(o=>Math.abs(o.hh-hh)<0.5)) opts.push({hh,lock:true});
+    }
+    for(const o of opts){
+      const tx=addText(rscNet(d.wL,d.wW,o.hh,p.fl,d.slot),p.txt,p.th);
+      let base=tx.shape; if(orient===1) base=rot90(base);
+      const ls=lineSets(base), xc=new Set([p.eL+p.mg]), yc=new Set([p.eT+p.mg]);
+      ls.v.forEach(L=>cxs.forEach(c=>xc.add(c-L.x))); ls.h.forEach(L=>cys.forEach(c=>yc.add(c-L.y)));
+      for(const ox of xc) for(const oy of yc){
+        if(ox<p.eL+p.mg-1e-6||oy<p.eT+p.mg-1e-6||ox+base.w>p.sW-p.eR-p.mg+1e-6||oy+base.h>p.sH-p.eB-p.mg+1e-6) continue;
+        let m=0, stray=0;
+        ls.v.forEach(L=>{ if(cxs.some(c=>Math.abs(c-(L.x+ox))<=tol)) m+=L.len; });
+        ls.h.forEach(L=>{ if(cys.some(c=>Math.abs(c-(L.y+oy))<=tol)) m+=L.len; });
+        cxs.forEach(c=>{ if(c>ox+tol&&c<ox+base.w-tol&&!ls.v.some(L=>Math.abs(L.x+ox-c)<=tol)) stray+=base.h; });
+        cys.forEach(c=>{ if(c>oy+tol&&c<oy+base.h-tol&&!ls.h.some(L=>Math.abs(L.y+oy-c)<=tol)) stray+=base.w; });
+        const score=m-0.7*stray-0.05*(o.hh-d.hhNeed);
+        if(!best||score>best.score) best={score,orient,o,base,ox,oy,m,tx,ls,cxs,cys,tol};
+      }
+    }
+  }
+  if(!best) return null;
+  const {base,ox,oy,ls,cxs:CX,cys:CY,tol:T_}=best;
+  best.total=ls.v.reduce((a,L)=>a+L.len,0)+ls.h.reduce((a,L)=>a+L.len,0);
+  best.matchedV=ls.v.filter(L=>CX.some(c=>Math.abs(c-(L.x+ox))<=T_)).map(L=>L.x+ox);
+  best.matchedH=ls.h.filter(L=>CY.some(c=>Math.abs(c-(L.y+oy))<=T_)).map(L=>L.y+oy);
+  best.strayV=CX.filter(c=>c>ox+T_&&c<ox+base.w-T_&&!ls.v.some(L=>Math.abs(L.x+ox-c)<=T_));
+  best.strayH=CY.filter(c=>c>oy+T_&&c<oy+base.h-T_&&!ls.h.some(L=>Math.abs(L.y+oy-c)<=T_));
+  return best;
+}
+
+function clipSeg(a,b,r){
+  let t0=0,t1=1; const dx=b[0]-a[0], dy=b[1]-a[1];
+  const chk=(pp,q)=>{ if(Math.abs(pp)<1e-12) return q>=-1e-9; const tt=q/pp; if(pp<0){ if(tt>t1) return false; if(tt>t0) t0=tt; } else { if(tt<t0) return false; if(tt<t1) t1=tt; } return true; };
+  if(chk(-dx,a[0]-r.x0)&&chk(dx,r.x1-a[0])&&chk(-dy,a[1]-r.y0)&&chk(dy,r.y1-a[1])&&t1-t0>1e-9) return [[a[0]+t0*dx,a[1]+t0*dy],[a[0]+t1*dx,a[1]+t1*dy]];
+  return null;
+}
+function clipPath(pts,r,closed){
+  const n=pts.length, edges=closed?n:n-1, out=[]; let cur=null;
+  for(let i=0;i<edges;i++){
+    const sg=clipSeg(pts[i],pts[(i+1)%n],r);
+    if(!sg){ cur=null; continue; }
+    if(cur && Math.hypot(cur[cur.length-1][0]-sg[0][0],cur[cur.length-1][1]-sg[0][1])<1e-6) cur.push(sg[1]);
+    else { cur=[sg[0],sg[1]]; out.push(cur); }
+  }
+  return out;
+}
+function clipShape(shape,r){
+  const inside=pt=>pt[0]>=r.x0-1e-6&&pt[0]<=r.x1+1e-6&&pt[1]>=r.y0-1e-6&&pt[1]<=r.y1+1e-6;
+  const cut=[], cutOpen=[];
+  shape.cut.forEach(poly=>{ if(poly.every(inside)) cut.push(poly); else cutOpen.push(...clipPath(poly,r,true)); });
+  const score=shape.score.flatMap(l=>clipPath(l,r,false));
+  const engrave=(shape.engrave||[]).flatMap(l=>clipPath(l,r,false));
+  return shift({cut,cutOpen,score,engrave,w:r.x1-r.x0,h:r.y1-r.y0},-r.x0,-r.y0);
+}
+function splitAxis(a0,a1,maxLen,cands){
+  const out=[]; let a=a0, warn=false;
+  while(a1-a>maxLen+1e-6){
+    const c=cands.filter(v=>v>a+20&&v<=a+maxLen+1e-6).pop();
+    const cut=c!==undefined?c:a+maxLen; if(c===undefined) warn=true;
+    out.push([a,cut]); a=cut;
+  }
+  out.push([a,a1]); return {segs:out,warn};
+}
+function windowsFor(shape,R,p){
+  const xc=R.ls.v.map(L=>L.x+R.ox).sort((a,b)=>a-b), yc=R.ls.h.map(L=>L.y+R.oy).sort((a,b)=>a-b);
+  const x0=R.ox,x1=R.ox+shape.w,y0=R.oy,y1=R.oy+shape.h;
+  let best=null;
+  for(const bedRot of [false,true]){
+    const mx=(bedRot?p.bh:p.bw)-4, my=(bedRot?p.bw:p.bh)-4;
+    const X=splitAxis(x0,x1,mx,xc), Y=splitAxis(y0,y1,my,yc);
+    const n=X.segs.length*Y.segs.length, warn=X.warn||Y.warn;
+    if(!best||warn<best.warn||(warn===best.warn&&n<best.n)) best={bedRot,X,Y,n,warn};
+  }
+  return best;
+}
+
+function renderReuse(p){
+  const out=$('sheetOut');
+  if(!parseList(p.cx,p.sW).length && !parseList(p.cy,p.sH).length){
+    out.innerHTML=`<div class="status warn">${t('reEnter')}</div>`; return; }
+  const R=planReuse(p);
+  if(!R){ out.innerHTML=`<div class="status bad">${t('reNoFit')}</div>`; return; }
+  const T_=R.tol;
+  let shape=shift(R.base,R.ox,R.oy);
+  const isOld=(a,b)=>{ if(Math.abs(a[0]-b[0])<1e-6) return R.cxs.some(c=>Math.abs(c-a[0])<=T_);
+    if(Math.abs(a[1]-b[1])<1e-6) return R.cys.some(c=>Math.abs(c-a[1])<=T_); return false; };
+  const matchedLines=shape.score.filter(([a,b])=>isOld(a,b));
+  if(p.dropOld) shape={...shape,score:shape.score.filter(([a,b])=>!isOld(a,b))};
+  const pct=R.total?Math.round(100*R.m/R.total):0;
+  const nMatch=R.matchedV.length+R.matchedH.length, nAll=R.ls.v.length+R.ls.h.length;
+  let msg=t('reCount',nMatch,nAll,pct);
+  msg+= R.o.lock ? t('reLock',f1(R.o.hh),f1(R.o.hh-rscDims(p).hhNeed)) : t('reFree',f1(R.o.hh));
+  if(R.orient===1) msg+=t('reRot');
+  let cls=pct>=50?'ok':'warn';
+  const strays=[...R.strayV.map(c=>t('reFromLeft',f1(c))),...R.strayH.map(c=>t('reFromTop',f1(c)))];
+  if(strays.length){ msg+=t('reStrays',strays.join(', ')); cls='warn'; }
+  if(!pct) msg+=t('reNoMatch');
+  const W=windowsFor(shape,R,p);
+  if(W.warn) { msg+=t('reSplit'); cls='warn'; }
+  let html=`<div class="status ${cls}">${msg}</div>`;
+  // preview
+  const ln=(x1,y1,x2,y2,col,w,dash)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${w}"${dash?' stroke-dasharray="8 6"':''} vector-effect="non-scaling-stroke"/>`;
+  const wins=[];
+  W.X.segs.forEach(([xa,xb])=>W.Y.segs.forEach(([ya,yb])=>wins.push({x0:xa,x1:xb,y0:ya,y1:yb})));
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" viewBox="-6 -6 ${p.sW+12} ${p.sH+12}">`+
+    `<rect x="0" y="0" width="${p.sW}" height="${p.sH}" fill="var(--card)" stroke="var(--muted)" stroke-width="1.2" vector-effect="non-scaling-stroke"/>${lostMarkup(p)}`+
+    R.cxs.map(x=>ln(x,0,x,p.sH,'var(--muted)',1.2,true)).join('')+R.cys.map(y=>ln(0,y,p.sW,y,'var(--muted)',1.2,true)).join('')+
+    wins.map(w=>`<rect x="${w.x0}" y="${w.y0}" width="${w.x1-w.x0}" height="${w.y1-w.y0}" fill="none" stroke="var(--accent)" stroke-width="1" stroke-dasharray="2 3" vector-effect="non-scaling-stroke"/>`).join('')+
+    matchedLines.map(([a,b])=>ln(a[0],a[1],b[0],b[1],'var(--ok)',3.5,false)).join('')+
+    `<g fill="none" stroke-linejoin="round" stroke-linecap="round">${layersMarkup([shape],true)}</g>`+
+    wins.map((w,i)=>`<text x="${w.x0+4}" y="${w.y0+Math.max(14,p.sH/40)}" font-size="${Math.max(12,p.sH/40)}" fill="var(--accent)">${i+1}</text>`).join('')+`</svg>`;
+  html+=`<p class="hint" style="margin-top:0">${t('reLegend')}</p><div class="preview">${svg}</div>`;
+  // windows / download
+  sheetDl=[]; let rows='';
+  wins.forEach((w,i)=>{
+    let part=clipShape(shape,w);
+    if(!part.cut.length&&!part.cutOpen.length&&!part.score.length&&!part.engrave.length) return;
+    if(W.bedRot) part=rot90(part);
+    const k=sheetDl.push({name:`reuse-part${i+1}.svg`,svg:toSVG([part],part.w,part.h,false)})-1;
+    rows+=`<tr><td>${t('rePart',i+1)}</td><td class="mono">${f1(w.x1-w.x0)} × ${f1(w.y1-w.y0)}</td><td class="mono">${t('shPos',f1(w.x0),f1(w.y0),false)}</td><td><button class="sm" data-dl="${k}">SVG</button></td></tr>`;
+  });
+  html+=`<table style="margin-top:10px"><tr><th>${t('thPart')}</th><th>${t('thSize')}</th><th>${t('thCorner')}</th><th></th></tr>${rows}</table>`+
+    `<p class="hint">${t('reHint',W.bedRot)}</p>`;
+  out.innerHTML=html;
+}
+$('sheetOut').addEventListener('change',e=>{ if(e.target.id==='sheetSel'){ sheetIdx=+e.target.value; drawSheet(); } });
+$('sheetOut').addEventListener('click',e=>{
+  const k=e.target.dataset.dl; if(k===undefined) return; const it=sheetDl[+k]; if(!it) return;
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([it.svg],{type:'image/svg+xml'})); a.download=it.name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+});
+
+/* ---------- settings ---------- */
+function settingsFor(tk){
+  let cut;
+  if(tk<=2.2) cut={p:100,s:12,n:'1'};
+  else if(tk<=3.5) cut={p:100,s:6,n:'1–2'};
+  else if(tk<=5) cut={p:100,s:4,n:'2–3'};
+  else cut={p:100,s:3,n:t('passes3')};
+  return [
+    ['engr','var(--engr)',t('md_engr'),15,150,'1'],
+    ['score','var(--score)',t('md_score'),tk<=2.2?12:20,100,'1'],
+    ['cut','var(--cut)',t('md_cut'),cut.p,cut.s,cut.n],
+  ];
+}
+function renderSettings(tk, hasText){
+  const rows = settingsFor(tk).filter(r => hasText || r[0]!=='engr');
+  const H = t('setHead');
+  $('settings').innerHTML = `<table><tr>${H.map(x=>`<th>${x}</th>`).join('')}</tr>`+
+    rows.map(r=>`<tr><td><span class="dot" style="background:${r[1]}"></span>${t('lyr_'+r[0])}</td><td>${r[2]}</td><td class="mono">${r[3]} %</td><td class="mono">${r[4]} mm/s</td><td class="mono">${r[5]}</td></tr>`).join('')+`</table>`+
+    `<p class="hint">${t('setNote',f1(tk))}</p>`;
+}
+
+/* ---------- display ---------- */
+function setStatus(cls, html){ $('status').innerHTML = `<div class="status ${cls}">${html}</div>`; }
+function read(){
+  return {oL:num('oL'),oW:num('oW'),oH:num('oH'),iL:num('iL'),iW:num('iW'),iH:num('iH'),
+    t:num('t')||3, cl:num('cl'), lh:num('lh')||25, fl:num('fl')||15, bw:num('bw')||430, bh:num('bh')||390,
+    rot:$('rot').checked, notch:$('notch').checked, txt:$('txt').value, th:num('th')||15,
+    useSheet:$('useSheet').checked, sW:num('sW'), sH:num('sH'), cx:$('cx').value, cy:$('cy').value, mg:num('mg'), cross:$('cross').checked, reuse:$('reuse').checked, dropOld:$('dropOld').checked, xh:num('xh'), useOuter:$('useOuter').checked,
+    eL:num('eL'), eR:num('eR'), eT:num('eT'), eB:num('eB')};
+}
+function addDownloads(items){
+  $('dlRow').innerHTML='';
+  items.forEach((it,i)=>{
+    const b=document.createElement('button');
+    b.className='dl'+(i?' sec':'');
+    b.textContent=it.label;
+    b.onclick=()=>{
+      const blob=new Blob([it.svg],{type:'image/svg+xml'});
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob); a.download=it.name; a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    };
+    $('dlRow').appendChild(b);
+  });
+}
+const partsTable = (r, extra) => `<table><tr><th>${t('thPart')}</th><th>${t('thSize')}</th><th></th></tr>`+
+  r.parts.map(x=>`<tr><td>${x[0]}</td><td class="mono">${x[1]}</td><td>${x[2]}</td></tr>`).join('')+
+  `<tr><td>${t('totalLayout')}</td><td class="mono">${f1(r.lay.W)} × ${f1(r.lay.H)}</td><td>${t('sheetWord')}</td></tr></table>`+(extra||'');
+const fitMsg = (p, r, okKey, badKey) => {
+  const ok=!p.useOuter||r.best.bad>=0;
+  let msg;
+  if(!p.useOuter) msg=t('calcOnly',f1(r.outer[0]),f1(r.outer[1]),f1(r.outer[2]));
+  else if(ok){ const [a,b,c]=r.best.s; msg=t(okKey,f1(a),f1(b),f1(c)); }
+  else msg=t(badKey,f1(-r.best.bad));
+  return {ok,msg};
+};
+
+function update(){
+  lsSet('recrease', {...getFields(), mode});
+  const p=read(); let pieces=[];
+  if(mode==='ins') p.useOuter=true;
+  $('outerChk').style.display = mode==='ins' ? 'none' : '';
+  $('outerBody').style.display = p.useOuter ? '' : 'none';
+  $('outerH2').textContent = t(mode==='ins' ? 'h_outerIns' : 'h_outer');
+  $('boxOpts').style.display = mode==='ins' ? 'none' : '';
+  $('lhBox').style.display = mode==='box' ? '' : 'none';
+  $('textPanel').style.display = mode==='ins' ? 'none' : '';
+  $('insOpts').style.display = mode==='ins' ? '' : 'none';
+  if([p.oL,p.oW,p.oH,p.iL,p.iW,p.iH].some(v=>v<=0)){
+    setStatus('bad',t('fillAll')); $('preview').innerHTML=''; $('details').innerHTML=''; $('dlRow').innerHTML=''; $('settings').innerHTML=''; return;
+  }
+  const bedTxt = `${p.bw}×${p.bh} mm`;
+  if(mode==='box'){
+    const r=calcBox(p);
+    pieces=[{shape:r.A,key:'box'},{shape:r.B,key:'lid'}];
+    const fm=fitMsg(p,r,'fitsBox','bigBox'); let msg=fm.msg, cls=fm.ok?'ok':'bad';
+    if(!r.lay.eachFits){ msg+=t('boxBed',bedTxt); if(fm.ok) cls='warn'; }
+    else if(!r.lay.fits) msg+=t('apart');
+    if(p.txt.trim()){
+      if(!r.tx.ok){ msg+=t('txtNoLid'); if(cls==='ok') cls='warn'; }
+      else if(r.tx.shrunk) msg+=t('txtShrunk',f1(r.tx.h));
+    }
+    setStatus(cls,msg);
+    $('preview').innerHTML=toSVG(r.lay.shapes,r.lay.W,r.lay.H,true);
+    const sz=s=>toSVG([s],s.w,s.h,false);
+    addDownloads([
+      {label:t('dlBoth'), name:`box-${p.iL}x${p.iW}x${p.iH}.svg`, svg:toSVG(r.lay.shapes,r.lay.W,r.lay.H,false)},
+      {label:t('dlBox'), name:'box-base.svg', svg:sz(r.A)},
+      {label:t('dlLid'), name:'box-lid.svg', svg:sz(r.B)},
+    ]);
+    $('details').innerHTML=partsTable(r);
+    renderSettings(p.t, !!(p.txt.trim() && r.tx.ok));
+  } else if(mode==='rsc'){
+    const r=calcRsc(p);
+    pieces=[{shape:r.A,key:'box'}];
+    const fm=fitMsg(p,r,'fitsRsc','bigRsc'); let msg=fm.msg, cls=fm.ok?'ok':'bad';
+    if(!r.lay.eachFits){ msg+=t('rscBig',f1(r.A.w),f1(r.A.h),bedTxt); if(fm.ok) cls='warn'; }
+    if(p.txt.trim()){
+      if(!r.tx.ok){ msg+=t('txtNoWall'); if(cls==='ok') cls='warn'; }
+      else if(r.tx.shrunk) msg+=t('txtShrunk',f1(r.tx.h));
+    }
+    setStatus(cls,msg);
+    $('preview').innerHTML=toSVG(r.lay.shapes,r.lay.W,r.lay.H,true);
+    addDownloads([{label:t('dlOne'), name:`one-piece-box-${p.iL}x${p.iW}x${p.iH}.svg`, svg:toSVG(r.lay.shapes,r.lay.W,r.lay.H,false)}]);
+    $('details').innerHTML=partsTable(r, t('rscFold',f1(p.t)));
+    renderSettings(p.t, !!(p.txt.trim() && r.tx.ok));
+  } else {
+    const r=calcIns(p);
+    pieces=[...Array(r.nFrame).fill({shape:r.frame,key:'frame'}),...Array(Math.max(0,r.rem)).fill({shape:r.solid,key:'plate'})];
+    const issues=[];
+    if(p.iH>p.oH) issues.push(t('insTall'));
+    if(r.cw>r.pw-16 || r.chh>r.ph-16) issues.push(t('insEdge',f1(r.cw),f1(r.chh),f1(r.pw),f1(r.ph)));
+    let cls=issues.length?'bad':'ok', msg;
+    if(issues.length) msg=issues.join('<br>');
+    else msg=t('insOk',r.total,r.bottom,r.nFrame,r.top);
+    if(r.total>20 && !issues.length) msg+=t('insMuch');
+    if(!r.lay.eachFits && !issues.length){ msg+=t('insBed',bedTxt); cls='warn'; }
+    setStatus(cls,msg);
+    $('preview').innerHTML=toSVG(r.lay.shapes,r.lay.W,r.lay.H,true);
+    addDownloads([
+      {label:t('dlIns'), name:'insert.svg', svg:toSVG(r.lay.shapes,r.lay.W,r.lay.H,false)},
+      {label:t('dlFrame'), name:'insert-frame.svg', svg:toSVG([r.frame],r.frame.w,r.frame.h,false)},
+      {label:t('dlSolid'), name:'insert-plate.svg', svg:toSVG([r.solid],r.solid.w,r.solid.h,false)},
+    ]);
+    $('details').innerHTML=`<table><tr><th>${t('thPlate')}</th><th>${t('thSize')}</th><th>${t('thQty')}</th></tr>`+
+      `<tr><td>${t('frameCut')}</td><td class="mono">${f1(r.pw)} × ${f1(r.ph)}, ${t('hole')} ${f1(r.cw)} × ${f1(r.chh)}</td><td class="mono">${r.nFrame} ${t('pcs')}</td></tr>`+
+      `<tr><td>${t('solidPlate')}</td><td class="mono">${f1(r.pw)} × ${f1(r.ph)}</td><td class="mono">${Math.max(0,r.rem)} ${t('pcs')}</td></tr></table>`+
+      `<p class="hint">${t('stack',r.bottom,r.top)}</p>`;
+    renderSettings(p.t, false);
+  }
+  renderSheet(p, pieces);
+}
+
+function setTabs(){
+  $('tabBox').setAttribute('aria-selected',mode==='box');
+  $('tabRsc').setAttribute('aria-selected',mode==='rsc');
+  $('tabIns').setAttribute('aria-selected',mode==='ins');
+}
+function setMode(m){ mode=m; setTabs(); update(); }
+
+/* ---------- saved boxes and my boxes ---------- */
+function renderSaved(){
+  const list=lsGet('recrease_saved',[]);
+  $('savedList').innerHTML = list.length ? '<ul>'+list.map(s=>
+    `<li><span><b>${esc(s.name)}</b> <span class="hint">${s.mode==='ins'?t('kindIns'):t('kindBox')} · ${esc(s.f.iL)}×${esc(s.f.iW)}×${esc(s.f.iH)}${s.f.txt?' · “'+esc(s.f.txt)+'”':''}</span></span>`+
+    `<span><button class="sm" data-open="${s.id}">${t('open')}</button><button class="sm sec" data-del="${s.id}">${t('del')}</button></span></li>`).join('')+'</ul>'
+    : `<p class="hint">${t('noSaved')}</p>`;
+}
+function renderBoxes(){
+  const list=lsGet('recrease_boxes',[]);
+  $('boxSel').innerHTML=`<option value="">${t('myBoxes')}</option>`+list.map((b,i)=>`<option value="${i}">${esc(b.name)} (${b.oL}×${b.oW}×${b.oH})</option>`).join('');
+}
+$('saveBtn').onclick=()=>{
+  const name=$('saveName').value.trim()||(t('defName')+' '+new Date().toLocaleDateString(lang==='nb'?'nb-NO':'en-GB'));
+  const list=lsGet('recrease_saved',[]);
+  list.unshift({id:String(Date.now()),name,mode,f:getFields()});
+  if(!lsSet('recrease_saved',list)) alert(t('alertSave'));
+  $('saveName').value=''; renderSaved();
+};
+$('savedList').onclick=e=>{
+  const o=e.target.dataset.open, d=e.target.dataset.del;
+  let list=lsGet('recrease_saved',[]);
+  if(o){ const s=list.find(x=>x.id===o); if(s){ setFields(s.f); setMode(s.mode); } }
+  if(d){ list=list.filter(x=>x.id!==d); lsSet('recrease_saved',list); renderSaved(); }
+};
+$('saveBox').onclick=()=>{
+  const name=$('boxName').value.trim(); if(!name) { $('boxName').focus(); return; }
+  const list=lsGet('recrease_boxes',[]).filter(b=>b.name!==name);
+  list.push({name,oL:num('oL'),oW:num('oW'),oH:num('oH')});
+  lsSet('recrease_boxes',list); renderBoxes(); $('boxSel').value=String(list.length-1);
+};
+$('boxSel').onchange=()=>{
+  const list=lsGet('recrease_boxes',[]); const b=list[$('boxSel').value];
+  if(b){ $('oL').value=b.oL; $('oW').value=b.oW; $('oH').value=b.oH; $('boxName').value=b.name; update(); }
+};
+$('delBox').onclick=()=>{
+  const list=lsGet('recrease_boxes',[]); const i=$('boxSel').value; if(i==='') return;
+  list.splice(+i,1); lsSet('recrease_boxes',list); renderBoxes();
+};
+$('expBtn').onclick=()=>{
+  const data=JSON.stringify({saved:lsGet('recrease_saved',[]),boxes:lsGet('recrease_boxes',[])},null,2);
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
+  a.download='recrease-backup.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+$('impBtn').onclick=()=>$('impFile').click();
+$('impFile').onchange=async()=>{
+  try{
+    const d=JSON.parse(await $('impFile').files[0].text());
+    const merge=(k,arr,key)=>{ const cur=lsGet(k,[]); (arr||[]).forEach(x=>{ if(!cur.some(c=>c[key]===x[key])) cur.push(x); }); lsSet(k,cur); };
+    merge('recrease_saved',d.saved,'id'); merge('recrease_boxes',d.boxes,'name');
+    renderSaved(); renderBoxes();
+  }catch(e){ alert(t('alertRead')); }
+  $('impFile').value='';
+};
+
+$('tabBox').onclick=()=>setMode('box');
+$('tabRsc').onclick=()=>setMode('rsc');
+$('tabIns').onclick=()=>setMode('ins');
+$('langNb').onclick=()=>setLang('nb');
+$('langEn').onclick=()=>setLang('en');
+document.querySelectorAll('input').forEach(e=>{ if(FIELD_IDS.includes(e.id)) e.addEventListener('input',update); });
+
+const init=lsGet('recrease',{});
+setFields(init); if(init.mode) mode=init.mode;
+setTabs(); applyLang();
+renderSaved(); renderBoxes(); update();
+</script>
+</body>
+</html>

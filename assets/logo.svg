@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256" role="img" aria-label="Recrease">
+  <g transform="translate(32 33.5) scale(.9) translate(-32 -32)">
+  <!-- ring with arrowhead: "re-" -->
+  <path d="M55.8 15.4 A29 29 0 1 1 39.5 4" fill="none" stroke="#3a2412" stroke-width="3.6" stroke-linecap="round"/>
+  <path d="M38 -0.5 L47.5 6.2 L37 9.6 Z" fill="#3a2412" transform="translate(0 0.4)"/>
+  <!-- cardboard cube -->
+  <path d="M32 12.25 L48.5 21.25 L32 30.25 L15.5 21.25 Z" fill="#e6bf86"/>
+  <path d="M15.5 21.25 L32 30.25 L32 49.75 L15.5 40.75 Z" fill="#c88f4f"/>
+  <path d="M48.5 21.25 L32 30.25 L32 49.75 L48.5 40.75 Z" fill="#a8713a"/>
+  <!-- tape on the lid -->
+  <path d="M26.5 15.25 L43 24.25 L38.2 26.9 L21.7 17.9 Z" fill="#f3dcb4"/>
+  <!-- dashed laser fold line -->
+  <path d="M15.5 21.25 L32 30.25 L48.5 21.25" fill="none" stroke="#3a2412" stroke-width="1" stroke-dasharray="2.2 1.8" opacity=".55"/>
+  <circle cx="32" cy="30.25" r="2.1" fill="#e5392b"/>
+  </g>
+</svg>
