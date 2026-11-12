@@ -112,6 +112,9 @@ footer svg{width:22px;height:22px}
             <div><label for="cx" data-i="cx"></label><input type="text" id="cx" value="150, 350"></div>
             <div><label for="cy" data-i="cy"></label><input type="text" id="cy" value="210, 440, 690"></div>
           </div>
+          <div style="margin-top:8px"><label for="slit" data-i="slit"></label>
+            <select id="slit"><option value="h" data-i="slitH"></option><option value="v" data-i="slitV"></option><option value="none" data-i="slitNone"></option></select></div>
+          <p class="hint" data-i="slitHint"></p>
           <p class="hint" style="margin-bottom:0" data-i="edgeHint"></p>
           <div class="row2" style="margin-top:4px">
             <div><label for="eL" data-i="eL"></label><input type="number" id="eL" min="0" step="1" value="0"></div>
@@ -349,9 +352,15 @@ const T = {
  reFromLeft:[c=>`${c} mm fra venstre`,c=>`${c} mm from left`], reFromTop:[c=>`${c} mm fra toppen`,c=>`${c} mm from top`],
  reNoMatch:['<br>Ingen av brettene traff – sjekk at målene på arket stemmer.','<br>None of the creases matched – check that the sheet measurements are correct.'],
  reSplit:['<br>⚠ Utlegget må deles midt i en vegg for å passe i laseren – lim eller teip skjøten, eller bruk en mindre gjenstand.','<br>⚠ The layout must be split in the middle of a wall to fit in the laser – glue or tape the seam, or use a smaller item.'],
- reLegend:['Grønne tykke linjer = brett som gjenbrukes. Grå stiplede = eksisterende bretter. Oransje stiplede firkanter = delene som kjøres i laseren.','Thick green lines = creases that are reused. Grey dashed = existing creases. Orange dashed rectangles = the parts that run in the laser.'],
+ reLegend:['Grønne tykke linjer = brett som gjenbrukes. Grå stiplede = eksisterende bretter. Lilla tykke = eksisterende kutt (skåret inn fra kanten). Oransje stiplede firkanter = delene som kjøres i laseren.','Thick green lines = creases that are reused. Grey dashed = existing creases. Thick purple = existing cuts (slit in from the edge). Orange dashed rectangles = the parts that run in the laser.'],
  rePart:[i=>`Del ${i}`,i=>`Part ${i}`], thCorner:['Hjørne på arket','Corner on the sheet'],
  reHint:[r=>`Legg arket i laseren slik at punktet i tabellen havner i øvre venstre hjørne av arbeidsflaten${r?' (<b>roter pappen 90° med klokka</b> først)':''}. Delene er delt langs eksisterende bretter, så brettelinjen ligger langs kanten av laserfeltet, uten krav til nøyaktig justering. Kjør delene hver for seg. Tegn eller teip en markering på arket mellom kjøringene.`,r=>`Place the sheet in the laser so the point in the table lands in the top-left corner of the work area${r?' (<b>rotate the cardboard 90° clockwise</b> first)':''}. The parts are split along existing creases, so the crease line lies along the edge of the laser field, with no need for exact alignment. Run the parts one at a time. Draw or tape a mark on the sheet between runs.`],
+ slit:['Skjæringer fra kanten (der flikene er skåret inn)','Cuts from the edge (where the flaps are slit)'],
+ slitH:['Langs de vannrette linjene, i ytterkolonnene (som i bildet)','Along the horizontal lines, in the outer columns (as in the photo)'],
+ slitV:['Langs de loddrette linjene, i ytterradene','Along the vertical lines, in the outer rows'],
+ slitNone:['Ingen skjæringer','No cuts'],
+ slitHint:['På en utbrettet eske er flikene skåret helt inn fra kanten til hovedbrettet. Disse linjene er kutt, ikke brett, utenfor hovedbrettene. Appen unngår å legge deler over slike kutt, og viser dem i lilla.','On a flattened box the flaps are slit all the way in from the edge to the main crease. Outside the main creases those lines are cuts, not folds. The app avoids placing parts across such cuts and shows them in purple.'],
+ reCrossWarn:[mm=>`<br>⚠ Eksisterende kutt går gjennom esken på ${mm} mm, så deler kan løsne. Prøv en mindre gjenstand eller et større ark.`,mm=>`<br>⚠ Existing cuts run through the box for ${mm} mm, so parts may come loose. Try a smaller item or a larger sheet.`],
  /* split into runs */
  spTitle:['Del kuttingen i omganger','Split the cutting into runs'],
  spHint:[r=>`Utlegget er større enn arbeidsflaten, så det er delt langs brettelinjer i flere kjøringer. Kjør kjøring 1. Flytt så pappen slik at brettelinjen fra kjøring 1 ligger der kjøring 2 begynner, og kjør kjøring 2. Brettelinjen på skjøten er med i begge filene, så du kan bruke den til å justere (sjekk plasseringen med forhåndsvisning/«frame» i laserprogrammet).${r?' <b>Roter pappen 90° med klokka</b> før du starter.':''}`,r=>`The layout is larger than the work area, so it is split along crease lines into several runs. Run 1 first. Then move the cardboard so the crease line from run 1 lies where run 2 begins, and run 2. The crease on the seam is in both files, so you can use it to line things up (check the position with the preview/“frame” in your laser software).${r?' <b>Rotate the cardboard 90° clockwise</b> before you start.':''}`],
@@ -388,7 +397,7 @@ function setLang(l){ lang=l; lsSet('recrease_lang', l); applyLang(); renderSaved
 let mode = 'box';
 
 /* ---------- storage ---------- */
-const FIELD_IDS = ['oL','oW','oH','iL','iW','iH','t','cl','lh','fl','bw','bh','rot','notch','txt','th','useSheet','sW','sH','cx','cy','mg','cross','reuse','dropOld','xh','useOuter','eL','eR','eT','eB'];
+const FIELD_IDS = ['oL','oW','oH','iL','iW','iH','t','cl','lh','fl','bw','bh','rot','notch','txt','th','useSheet','sW','sH','cx','cy','mg','cross','reuse','dropOld','xh','useOuter','eL','eR','eT','eB','slit'];
 const getFields = () => Object.fromEntries(FIELD_IDS.map(id => [id, $(id).type==='checkbox' ? $(id).checked : $(id).value]));
 const setFields = o => { FIELD_IDS.forEach(id => { if(!(id in o)) return; if($(id).type==='checkbox') $(id).checked = !!o[id]; else $(id).value = o[id]; }); };
 
@@ -619,15 +628,49 @@ const rot90 = s => { const m=([x,y])=>[s.h-y, x];
   return {cut:s.cut.map(p=>p.map(m)), score:s.score.map(l=>l.map(m)), engrave:(s.engrave||[]).map(l=>l.map(m)), cutOpen:(s.cutOpen||[]).map(l=>l.map(m)), w:s.h, h:s.w}; };
 const parseList = (str,max) => String(str).split(/[ ,;]+/).map(parseFloat).filter(v=>v>0&&v<max).sort((a,b)=>a-b);
 
-function sheetRegions(p){
+function oldGeom(p){
   const X0=p.eL, X1=p.sW-p.eR, Y0=p.eT, Y1=p.sH-p.eB;
-  const xs=[X0,...(p.cross?[]:parseList(p.cx,p.sW).filter(v=>v>X0&&v<X1)),X1], ys=[Y0,...(p.cross?[]:parseList(p.cy,p.sH).filter(v=>v>Y0&&v<Y1)),Y1];
-  const regs=[];
-  for(let i=0;i<xs.length-1;i++) for(let j=0;j<ys.length-1;j++){
-    const x0=xs[i]+p.mg, y0=ys[j]+p.mg, w=xs[i+1]-xs[i]-2*p.mg, h=ys[j+1]-ys[j]-2*p.mg;
-    if(w<20||h<20) continue;
-    regs.push({x:x0,y:y0,w,h});
+  const cxs=parseList(p.cx,p.sW).filter(v=>v>X0&&v<X1), cys=parseList(p.cy,p.sH).filter(v=>v>Y0&&v<Y1);
+  const folds=[], cuts=[];
+  if(p.slit==='h' && cxs.length>=2){
+    const a=cxs[0], b=cxs[cxs.length-1];
+    cxs.forEach(x=>folds.push({o:'v',pos:x,a:Y0,b:Y1}));
+    cys.forEach(y=>{ cuts.push({o:'h',pos:y,a:X0,b:a},{o:'h',pos:y,a:b,b:X1}); folds.push({o:'h',pos:y,a:a,b:b}); });
+  } else if(p.slit==='v' && cys.length>=2){
+    const a=cys[0], b=cys[cys.length-1];
+    cys.forEach(y=>folds.push({o:'h',pos:y,a:X0,b:X1}));
+    cxs.forEach(x=>{ cuts.push({o:'v',pos:x,a:Y0,b:a},{o:'v',pos:x,a:b,b:Y1}); folds.push({o:'v',pos:x,a:a,b:b}); });
+  } else {
+    cxs.forEach(x=>folds.push({o:'v',pos:x,a:Y0,b:Y1})); cys.forEach(y=>folds.push({o:'h',pos:y,a:X0,b:X1}));
   }
+  return {folds,cuts,cxs,cys,X0,X1,Y0,Y1};
+}
+function oldLinesSVG(G,p){
+  const ln=(x1,y1,x2,y2,col,w,dash)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${w}"${dash?' stroke-dasharray="8 6"':''} vector-effect="non-scaling-stroke"/>`;
+  const seg=(F,col,w,dash)=>F.o==='v'?ln(F.pos,F.a,F.pos,F.b,col,w,dash):ln(F.a,F.pos,F.b,F.pos,col,w,dash);
+  return G.folds.map(F=>seg(F,'var(--muted)',1.2,true)).join('')+G.cuts.map(C=>seg(C,'#9b3fb5',3,false)).join('');
+}
+function sheetRegions(p){
+  const G=oldGeom(p), {X0,X1,Y0,Y1,cxs,cys}=G;
+  const rects=[];
+  const grid=(xa,xb,ya,yb,useX,useY)=>{
+    const xs=[xa,...(useX?cxs.filter(v=>v>xa&&v<xb):[]),xb], ys=[ya,...(useY?cys.filter(v=>v>ya&&v<yb):[]),yb];
+    for(let i=0;i<xs.length-1;i++) for(let j=0;j<ys.length-1;j++) rects.push([xs[i],xs[i+1],ys[j],ys[j+1]]);
+  };
+  if(!p.cross) grid(X0,X1,Y0,Y1,true,true);
+  else if(p.slit==='h' && cxs.length>=2){
+    const a=cxs[0], b=cxs[cxs.length-1];
+    grid(X0,a,Y0,Y1,false,true); grid(a,b,Y0,Y1,false,false); grid(b,X1,Y0,Y1,false,true);
+  } else if(p.slit==='v' && cys.length>=2){
+    const a=cys[0], b=cys[cys.length-1];
+    grid(X0,X1,Y0,a,true,false); grid(X0,X1,a,b,false,false); grid(X0,X1,b,Y1,true,false);
+  } else grid(X0,X1,Y0,Y1,false,false);
+  const regs=[];
+  rects.forEach(([xa,xb,ya,yb])=>{
+    const x0=xa+p.mg, y0=ya+p.mg, w=xb-xa-2*p.mg, h=yb-ya-2*p.mg;
+    if(w<20||h<20) return;
+    regs.push({x:x0,y:y0,w,h});
+  });
   return regs;
 }
 const contains=(b,a)=>a.x>=b.x&&a.y>=b.y&&a.x+a.w<=b.x+b.w&&a.y+a.h<=b.y+b.h;
@@ -710,11 +753,10 @@ function drawSheet(){
   const sh=sheets[sheetIdx];
   if(n>1) html+=`<label for="sheetSel">${t('shShow')}</label><select id="sheetSel">${sheets.map((_,i)=>`<option value="${i}"${i===sheetIdx?' selected':''}>${t('shSheetN',i+1,n)}</option>`).join('')}</select>`;
   const all=[]; sh.regions.forEach(rg=>rg.placed.forEach(pl=>all.push(shift(placedShape(pl),rg.x+pl.x,rg.y+pl.y))));
-  const xs=p.cross?[]:parseList(p.cx,p.sW), ys=p.cross?[]:parseList(p.cy,p.sH);
-  const ln=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--muted)" stroke-dasharray="8 6" stroke-width="1.2" vector-effect="non-scaling-stroke"/>`;
+  const G0=oldGeom(p);
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" viewBox="-6 -6 ${p.sW+12} ${p.sH+12}">`+
     `<rect x="0" y="0" width="${p.sW}" height="${p.sH}" fill="var(--card)" stroke="var(--muted)" stroke-width="1.2" vector-effect="non-scaling-stroke"/>${lostMarkup(p)}`+
-    xs.map(x=>ln(x,0,x,p.sH)).join('')+ys.map(y=>ln(0,y,p.sW,y)).join('')+
+    oldLinesSVG(G0,p)+
     sh.regions.map(r=>`<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="none" stroke="var(--muted)" stroke-dasharray="2 3" stroke-width="1" vector-effect="non-scaling-stroke" opacity=".6"/>`).join('')+
     `<g fill="none" stroke-linejoin="round" stroke-linecap="round">${layersMarkup(all,true)}</g></svg>`;
   html+=`<div class="preview" style="margin-top:8px">${svg}</div>`;
@@ -744,13 +786,34 @@ function rscDims(p){ const tk=p.t; return {t:tk, wL:p.iL+2*p.cl+tk, wW:p.iW+2*p.
 function lineSets(shape){
   const v=[], h=[];
   shape.score.forEach(([a,b])=>{
-    if(Math.abs(a[0]-b[0])<1e-6) v.push({x:a[0],len:Math.abs(a[1]-b[1])});
-    else if(Math.abs(a[1]-b[1])<1e-6) h.push({y:a[1],len:Math.abs(a[0]-b[0])});
+    if(Math.abs(a[0]-b[0])<1e-6) v.push({x:a[0],y0:Math.min(a[1],b[1]),y1:Math.max(a[1],b[1]),len:Math.abs(a[1]-b[1])});
+    else if(Math.abs(a[1]-b[1])<1e-6) h.push({y:a[1],x0:Math.min(a[0],b[0]),x1:Math.max(a[0],b[0]),len:Math.abs(a[0]-b[0])});
   });
   return {v,h};
 }
+const ovl=(a0,a1,b0,b1)=>Math.max(0,Math.min(a1,b1)-Math.max(a0,b0));
+function inPoly(pt,poly){ let c=false; for(let i=0,j=poly.length-1;i<poly.length;j=i++){ const [xi,yi]=poly[i],[xj,yj]=poly[j]; if(((yi>pt[1])!==(yj>pt[1]))&&(pt[0]<(xj-xi)*(pt[1]-yi)/(yj-yi)+xi)) c=!c; } return c; }
+function distSeg(p,a,b){ const dx=b[0]-a[0],dy=b[1]-a[1],l2=dx*dx+dy*dy; let k=l2?((p[0]-a[0])*dx+(p[1]-a[1])*dy)/l2:0; k=Math.max(0,Math.min(1,k)); return Math.hypot(p[0]-a[0]-k*dx,p[1]-a[1]-k*dy); }
+function nearPoly(pt,poly,d){ for(let i=0;i<poly.length;i++){ if(distSeg(pt,poly[i],poly[(i+1)%poly.length])<=d) return true; } return false; }
+// length (mm) of existing cuts that run through the solid part of the layout
+function slitCross(G,poly,ox,oy,w,h,tol){
+  let len=0;
+  for(const C of G.cuts){
+    if(C.o==='v'){ const x=C.pos-ox; if(x<=tol||x>=w-tol) continue;
+      for(let y=Math.max(C.a-oy,0)+1; y<Math.min(C.b-oy,h); y+=4){ const pt=[x,y]; if(inPoly(pt,poly)&&!nearPoly(pt,poly,tol)) len+=4; } }
+    else { const y=C.pos-oy; if(y<=tol||y>=h-tol) continue;
+      for(let x=Math.max(C.a-ox,0)+1; x<Math.min(C.b-ox,w); x+=4){ const pt=[x,y]; if(inPoly(pt,poly)&&!nearPoly(pt,poly,tol)) len+=4; } }
+  }
+  return len;
+}
+// how much of a (global) line lies on an existing fold
+function foldOverlap(G,o,pos,a,b,tol){
+  let m=0;
+  for(const F of G.folds) if(F.o===o && Math.abs(F.pos-pos)<=tol) m+=ovl(a,b,F.a,F.b);
+  return m;
+}
 function planReuse(p){
-  const d=rscDims(p), tol=2, cxs=parseList(p.cx,p.sW), cys=parseList(p.cy,p.sH);
+  const d=rscDims(p), tol=2, G=oldGeom(p), cxs=G.cxs, cys=G.cys;
   let best=null;
   for(const orient of [0,1]){
     const wallC = orient===0 ? cys : cxs;
@@ -762,27 +825,33 @@ function planReuse(p){
     for(const o of opts){
       const tx=addText(rscNet(d.wL,d.wW,o.hh,p.fl,d.slot),p.txt,p.th);
       let base=tx.shape; if(orient===1) base=rot90(base);
-      const ls=lineSets(base), xc=new Set([p.eL+p.mg]), yc=new Set([p.eT+p.mg]);
+      const ls=lineSets(base), poly=base.cut[0], xc=new Set([p.eL+p.mg]), yc=new Set([p.eT+p.mg]);
       ls.v.forEach(L=>cxs.forEach(c=>xc.add(c-L.x))); ls.h.forEach(L=>cys.forEach(c=>yc.add(c-L.y)));
       for(const ox of xc) for(const oy of yc){
         if(ox<p.eL+p.mg-1e-6||oy<p.eT+p.mg-1e-6||ox+base.w>p.sW-p.eR-p.mg+1e-6||oy+base.h>p.sH-p.eB-p.mg+1e-6) continue;
         let m=0, stray=0;
-        ls.v.forEach(L=>{ if(cxs.some(c=>Math.abs(c-(L.x+ox))<=tol)) m+=L.len; });
-        ls.h.forEach(L=>{ if(cys.some(c=>Math.abs(c-(L.y+oy))<=tol)) m+=L.len; });
-        cxs.forEach(c=>{ if(c>ox+tol&&c<ox+base.w-tol&&!ls.v.some(L=>Math.abs(L.x+ox-c)<=tol)) stray+=base.h; });
-        cys.forEach(c=>{ if(c>oy+tol&&c<oy+base.h-tol&&!ls.h.some(L=>Math.abs(L.y+oy-c)<=tol)) stray+=base.w; });
-        const score=m-0.7*stray-0.05*(o.hh-d.hhNeed);
-        if(!best||score>best.score) best={score,orient,o,base,ox,oy,m,tx,ls,cxs,cys,tol};
+        ls.v.forEach(L=>{ m+=foldOverlap(G,'v',L.x+ox,L.y0+oy,L.y1+oy,tol); });
+        ls.h.forEach(L=>{ m+=foldOverlap(G,'h',L.y+oy,L.x0+ox,L.x1+ox,tol); });
+        G.folds.forEach(F=>{
+          if(F.o==='v'){ if(F.pos>ox+tol&&F.pos<ox+base.w-tol&&!ls.v.some(L=>Math.abs(L.x+ox-F.pos)<=tol)) stray+=ovl(F.a,F.b,oy,oy+base.h); }
+          else { if(F.pos>oy+tol&&F.pos<oy+base.h-tol&&!ls.h.some(L=>Math.abs(L.y+oy-F.pos)<=tol)) stray+=ovl(F.a,F.b,ox,ox+base.w); }
+        });
+        const cross=slitCross(G,poly,ox,oy,base.w,base.h,tol);
+        const score=m-0.7*stray-10*cross-0.05*(o.hh-d.hhNeed);
+        if(!best||score>best.score) best={score,orient,o,base,ox,oy,m,tx,ls,G,cxs,cys,tol,cross};
       }
     }
   }
   if(!best) return null;
-  const {base,ox,oy,ls,cxs:CX,cys:CY,tol:T_}=best;
+  const {base,ox,oy,ls,G:GG,tol:T_}=best;
   best.total=ls.v.reduce((a,L)=>a+L.len,0)+ls.h.reduce((a,L)=>a+L.len,0);
-  best.matchedV=ls.v.filter(L=>CX.some(c=>Math.abs(c-(L.x+ox))<=T_)).map(L=>L.x+ox);
-  best.matchedH=ls.h.filter(L=>CY.some(c=>Math.abs(c-(L.y+oy))<=T_)).map(L=>L.y+oy);
-  best.strayV=CX.filter(c=>c>ox+T_&&c<ox+base.w-T_&&!ls.v.some(L=>Math.abs(L.x+ox-c)<=T_));
-  best.strayH=CY.filter(c=>c>oy+T_&&c<oy+base.h-T_&&!ls.h.some(L=>Math.abs(L.y+oy-c)<=T_));
+  best.matchedV=ls.v.filter(L=>foldOverlap(GG,'v',L.x+ox,L.y0+oy,L.y1+oy,T_)>=0.9*L.len);
+  best.matchedH=ls.h.filter(L=>foldOverlap(GG,'h',L.y+oy,L.x0+ox,L.x1+ox,T_)>=0.9*L.len);
+  const strayPos=(o)=>[...new Set(GG.folds.filter(F=>F.o===o).filter(F=>{
+    if(o==='v') return F.pos>ox+T_&&F.pos<ox+base.w-T_&&!ls.v.some(L=>Math.abs(L.x+ox-F.pos)<=T_)&&ovl(F.a,F.b,oy,oy+base.h)>10;
+    return F.pos>oy+T_&&F.pos<oy+base.h-T_&&!ls.h.some(L=>Math.abs(L.y+oy-F.pos)<=T_)&&ovl(F.a,F.b,ox,ox+base.w)>10;
+  }).map(F=>F.pos))];
+  best.strayV=strayPos('v'); best.strayH=strayPos('h');
   return best;
 }
 
@@ -838,23 +907,26 @@ function renderReuse(p){
     out.innerHTML=`<div class="status warn">${t('reEnter')}</div>`; return; }
   const R=planReuse(p);
   if(!R){ out.innerHTML=`<div class="status bad">${t('reNoFit')}</div>`; return; }
-  const T_=R.tol;
+  const T_=R.tol, G=R.G;
   let shape=shift(R.base,R.ox,R.oy);
-  const isOld=(a,b)=>{ if(Math.abs(a[0]-b[0])<1e-6) return R.cxs.some(c=>Math.abs(c-a[0])<=T_);
-    if(Math.abs(a[1]-b[1])<1e-6) return R.cys.some(c=>Math.abs(c-a[1])<=T_); return false; };
+  const isOld=(a,b)=>{
+    if(Math.abs(a[0]-b[0])<1e-6){ const len=Math.abs(a[1]-b[1]); return foldOverlap(G,'v',a[0],Math.min(a[1],b[1]),Math.max(a[1],b[1]),T_)>=0.9*len; }
+    if(Math.abs(a[1]-b[1])<1e-6){ const len=Math.abs(a[0]-b[0]); return foldOverlap(G,'h',a[1],Math.min(a[0],b[0]),Math.max(a[0],b[0]),T_)>=0.9*len; }
+    return false; };
   const matchedLines=shape.score.filter(([a,b])=>isOld(a,b));
   if(p.dropOld) shape={...shape,score:shape.score.filter(([a,b])=>!isOld(a,b))};
   const pct=R.total?Math.round(100*R.m/R.total):0;
   const nMatch=R.matchedV.length+R.matchedH.length, nAll=R.ls.v.length+R.ls.h.length;
-  let msg=t('reCount',nMatch,nAll,pct);
+  let msg=t('reCount',nMatch,nAll,Math.min(100,pct));
   msg+= R.o.lock ? t('reLock',f1(R.o.hh),f1(R.o.hh-rscDims(p).hhNeed)) : t('reFree',f1(R.o.hh));
   if(R.orient===1) msg+=t('reRot');
   let cls=pct>=50?'ok':'warn';
   const strays=[...R.strayV.map(c=>t('reFromLeft',f1(c))),...R.strayH.map(c=>t('reFromTop',f1(c)))];
   if(strays.length){ msg+=t('reStrays',strays.join(', ')); cls='warn'; }
+  if(R.cross>8){ msg+=t('reCrossWarn',Math.round(R.cross)); cls='bad'; }
   if(!pct) msg+=t('reNoMatch');
   const W=windowsFor(shape,R,p);
-  if(W.warn) { msg+=t('reSplit'); cls='warn'; }
+  if(W.warn) { msg+=t('reSplit'); if(cls==='ok') cls='warn'; }
   let html=`<div class="status ${cls}">${msg}</div>`;
   // preview
   const ln=(x1,y1,x2,y2,col,w,dash)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${w}"${dash?' stroke-dasharray="8 6"':''} vector-effect="non-scaling-stroke"/>`;
@@ -862,7 +934,7 @@ function renderReuse(p){
   W.X.segs.forEach(([xa,xb])=>W.Y.segs.forEach(([ya,yb])=>wins.push({x0:xa,x1:xb,y0:ya,y1:yb})));
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" viewBox="-6 -6 ${p.sW+12} ${p.sH+12}">`+
     `<rect x="0" y="0" width="${p.sW}" height="${p.sH}" fill="var(--card)" stroke="var(--muted)" stroke-width="1.2" vector-effect="non-scaling-stroke"/>${lostMarkup(p)}`+
-    R.cxs.map(x=>ln(x,0,x,p.sH,'var(--muted)',1.2,true)).join('')+R.cys.map(y=>ln(0,y,p.sW,y,'var(--muted)',1.2,true)).join('')+
+    oldLinesSVG(G,p)+
     wins.map(w=>`<rect x="${w.x0}" y="${w.y0}" width="${w.x1-w.x0}" height="${w.y1-w.y0}" fill="none" stroke="var(--accent)" stroke-width="1" stroke-dasharray="2 3" vector-effect="non-scaling-stroke"/>`).join('')+
     matchedLines.map(([a,b])=>ln(a[0],a[1],b[0],b[1],'var(--ok)',3.5,false)).join('')+
     `<g fill="none" stroke-linejoin="round" stroke-linecap="round">${layersMarkup([shape],true)}</g>`+
@@ -963,7 +1035,7 @@ function read(){
     t:num('t')||3, cl:num('cl'), lh:num('lh')||25, fl:num('fl')||15, bw:num('bw')||430, bh:num('bh')||390,
     rot:$('rot').checked, notch:$('notch').checked, txt:$('txt').value, th:num('th')||15,
     useSheet:$('useSheet').checked, sW:num('sW'), sH:num('sH'), cx:$('cx').value, cy:$('cy').value, mg:num('mg'), cross:$('cross').checked, reuse:$('reuse').checked, dropOld:$('dropOld').checked, xh:num('xh'), useOuter:$('useOuter').checked,
-    eL:num('eL'), eR:num('eR'), eT:num('eT'), eB:num('eB')};
+    eL:num('eL'), eR:num('eR'), eT:num('eT'), eB:num('eB'), slit:$('slit').value};
 }
 function addDownloads(items){
   $('dlRow').innerHTML='';
