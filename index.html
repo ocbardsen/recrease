@@ -202,6 +202,7 @@ footer svg{width:22px;height:22px}
         <div class="preview" id="preview"></div>
         <div id="dlRow"></div>
         <div id="details" style="margin-top:14px"></div>
+        <div id="splitOut"></div>
 
         <h3 data-i="h_settings"></h3>
         <div id="settings"></div>
@@ -351,6 +352,12 @@ const T = {
  reLegend:['Grønne tykke linjer = brett som gjenbrukes. Grå stiplede = eksisterende bretter. Oransje stiplede firkanter = delene som kjøres i laseren.','Thick green lines = creases that are reused. Grey dashed = existing creases. Orange dashed rectangles = the parts that run in the laser.'],
  rePart:[i=>`Del ${i}`,i=>`Part ${i}`], thCorner:['Hjørne på arket','Corner on the sheet'],
  reHint:[r=>`Legg arket i laseren slik at punktet i tabellen havner i øvre venstre hjørne av arbeidsflaten${r?' (<b>roter pappen 90° med klokka</b> først)':''}. Delene er delt langs eksisterende bretter, så brettelinjen ligger langs kanten av laserfeltet, uten krav til nøyaktig justering. Kjør delene hver for seg. Tegn eller teip en markering på arket mellom kjøringene.`,r=>`Place the sheet in the laser so the point in the table lands in the top-left corner of the work area${r?' (<b>rotate the cardboard 90° clockwise</b> first)':''}. The parts are split along existing creases, so the crease line lies along the edge of the laser field, with no need for exact alignment. Run the parts one at a time. Draw or tape a mark on the sheet between runs.`],
+ /* split into runs */
+ spTitle:['Del kuttingen i omganger','Split the cutting into runs'],
+ spHint:[r=>`Utlegget er større enn arbeidsflaten, så det er delt langs brettelinjer i flere kjøringer. Kjør kjøring 1. Flytt så pappen slik at brettelinjen fra kjøring 1 ligger der kjøring 2 begynner, og kjør kjøring 2. Brettelinjen på skjøten er med i begge filene, så du kan bruke den til å justere (sjekk plasseringen med forhåndsvisning/«frame» i laserprogrammet).${r?' <b>Roter pappen 90° med klokka</b> før du starter.':''}`,r=>`The layout is larger than the work area, so it is split along crease lines into several runs. Run 1 first. Then move the cardboard so the crease line from run 1 lies where run 2 begins, and run 2. The crease on the seam is in both files, so you can use it to line things up (check the position with the preview/“frame” in your laser software).${r?' <b>Rotate the cardboard 90° clockwise</b> before you start.':''}`],
+ spWarn:['<br>⚠ Det finnes ingen brettelinje å dele langs innenfor rekkevidden, så skjøten havner midt i en flate. Lim eller teip skjøten, eller bruk en mindre gjenstand.','<br>⚠ There is no crease line within reach to split along, so the seam ends up in the middle of a surface. Glue or tape the seam, or use a smaller item.'],
+ spRun:[i=>`Kjøring ${i}`,i=>`Run ${i}`],
+ thPos:['Plassering i utlegget','Position in the layout'],
  /* saved */
  kindBox:['eske','box'], kindIns:['innlegg','insert'], open:['Åpne','Open'],
  noSaved:['Ingen lagrede esker ennå.','No saved boxes yet.'], defName:['Eske','Box'],
@@ -881,6 +888,53 @@ $('sheetOut').addEventListener('click',e=>{
   setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 });
 
+/* ---------- split a too-large layout into runs ---------- */
+let splitDl=[];
+function splitShape(shape,p){
+  const ls=lineSets(shape);
+  const xc=ls.v.map(L=>L.x).sort((a,b)=>a-b), yc=ls.h.map(L=>L.y).sort((a,b)=>a-b);
+  let best=null;
+  for(const bedRot of [false,true]){
+    const mx=(bedRot?p.bh:p.bw)-4, my=(bedRot?p.bw:p.bh)-4;
+    const X=splitAxis(0,shape.w,mx,xc), Y=splitAxis(0,shape.h,my,yc);
+    const n=X.segs.length*Y.segs.length, warn=X.warn||Y.warn;
+    if(!best||warn<best.warn||(warn===best.warn&&n<best.n)) best={bedRot,X,Y,n,warn};
+  }
+  const wins=[]; best.X.segs.forEach(([xa,xb])=>best.Y.segs.forEach(([ya,yb])=>wins.push({x0:xa,x1:xb,y0:ya,y1:yb})));
+  return {...best,wins};
+}
+function renderSplit(p, items){
+  const out=$('splitOut'); splitDl=[];
+  const fitsBed=s=>(s.w<=p.bw&&s.h<=p.bh)||(s.h<=p.bw&&s.w<=p.bh);
+  const big=items.filter(it=>!fitsBed(it.shape));
+  if(!big.length || (p.useSheet && p.reuse && mode==='rsc')){ out.innerHTML=''; return; }
+  let html=`<h3>${t('spTitle')}</h3>`;
+  big.forEach(it=>{
+    const S=splitShape(it.shape,p), sh=it.shape;
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" viewBox="-6 -6 ${sh.w+12} ${sh.h+12}">`+
+      `<g fill="none" stroke-linejoin="round" stroke-linecap="round">${layersMarkup([sh],true)}</g>`+
+      S.wins.map(w=>`<rect x="${w.x0}" y="${w.y0}" width="${w.x1-w.x0}" height="${w.y1-w.y0}" fill="none" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`).join('')+
+      S.wins.map((w,i)=>`<text x="${w.x0+4}" y="${w.y0+Math.max(14,sh.h/12)}" font-size="${Math.max(12,sh.h/12)}" fill="var(--accent)" font-weight="700">${i+1}</text>`).join('')+`</svg>`;
+    let rows='';
+    S.wins.forEach((w,i)=>{
+      let part=clipShape(sh,w);
+      if(!part.cut.length&&!part.cutOpen.length&&!part.score.length&&!part.engrave.length) return;
+      if(S.bedRot) part=rot90(part);
+      const k=splitDl.push({name:`${it.name}-run${i+1}.svg`,svg:toSVG([part],part.w,part.h,false)})-1;
+      rows+=`<tr><td>${t('spRun',i+1)}</td><td class="mono">${f1(w.x1-w.x0)} × ${f1(w.y1-w.y0)}</td><td class="mono">${t('shPos',f1(w.x0),f1(w.y0),false)}</td><td><button class="sm" data-sl="${k}">SVG</button></td></tr>`;
+    });
+    html+=`<div class="preview" style="margin-top:6px">${svg}</div>`+
+      `<table style="margin-top:8px"><tr><th>${esc(t('lbl_'+it.key))}</th><th>${t('thSize')}</th><th>${t('thPos')}</th><th></th></tr>${rows}</table>`+
+      `<p class="hint" style="margin-top:6px">${t('spHint',S.bedRot)}${S.warn?t('spWarn'):''}</p>`;
+  });
+  out.innerHTML=html;
+}
+$('splitOut').addEventListener('click',e=>{
+  const k=e.target.dataset.sl; if(k===undefined) return; const it=splitDl[+k]; if(!it) return;
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([it.svg],{type:'image/svg+xml'})); a.download=it.name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+});
+
 /* ---------- settings ---------- */
 function settingsFor(tk){
   let cut;
@@ -940,7 +994,7 @@ const fitMsg = (p, r, okKey, badKey) => {
 
 function update(){
   lsSet('recrease', {...getFields(), mode});
-  const p=read(); let pieces=[];
+  const p=read(); let pieces=[], splitItems=[];
   if(mode==='ins') p.useOuter=true;
   $('outerChk').style.display = mode==='ins' ? 'none' : '';
   $('outerBody').style.display = p.useOuter ? '' : 'none';
@@ -950,12 +1004,13 @@ function update(){
   $('textPanel').style.display = mode==='ins' ? 'none' : '';
   $('insOpts').style.display = mode==='ins' ? '' : 'none';
   if([p.oL,p.oW,p.oH,p.iL,p.iW,p.iH].some(v=>v<=0)){
-    setStatus('bad',t('fillAll')); $('preview').innerHTML=''; $('details').innerHTML=''; $('dlRow').innerHTML=''; $('settings').innerHTML=''; return;
+    setStatus('bad',t('fillAll')); $('preview').innerHTML=''; $('details').innerHTML=''; $('dlRow').innerHTML=''; $('settings').innerHTML=''; $('splitOut').innerHTML=''; return;
   }
   const bedTxt = `${p.bw}×${p.bh} mm`;
   if(mode==='box'){
     const r=calcBox(p);
     pieces=[{shape:r.A,key:'box'},{shape:r.B,key:'lid'}];
+    splitItems=[{key:'box',name:'box-base',shape:r.A},{key:'lid',name:'box-lid',shape:r.B}];
     const fm=fitMsg(p,r,'fitsBox','bigBox'); let msg=fm.msg, cls=fm.ok?'ok':'bad';
     if(!r.lay.eachFits){ msg+=t('boxBed',bedTxt); if(fm.ok) cls='warn'; }
     else if(!r.lay.fits) msg+=t('apart');
@@ -976,6 +1031,7 @@ function update(){
   } else if(mode==='rsc'){
     const r=calcRsc(p);
     pieces=[{shape:r.A,key:'box'}];
+    splitItems=[{key:'box',name:'one-piece-box',shape:r.A}];
     const fm=fitMsg(p,r,'fitsRsc','bigRsc'); let msg=fm.msg, cls=fm.ok?'ok':'bad';
     if(!r.lay.eachFits){ msg+=t('rscBig',f1(r.A.w),f1(r.A.h),bedTxt); if(fm.ok) cls='warn'; }
     if(p.txt.trim()){
@@ -990,6 +1046,7 @@ function update(){
   } else {
     const r=calcIns(p);
     pieces=[...Array(r.nFrame).fill({shape:r.frame,key:'frame'}),...Array(Math.max(0,r.rem)).fill({shape:r.solid,key:'plate'})];
+    splitItems=[{key:'frame',name:'insert-frame',shape:r.frame},{key:'plate',name:'insert-plate',shape:r.solid}];
     const issues=[];
     if(p.iH>p.oH) issues.push(t('insTall'));
     if(r.cw>r.pw-16 || r.chh>r.ph-16) issues.push(t('insEdge',f1(r.cw),f1(r.chh),f1(r.pw),f1(r.ph)));
@@ -1012,6 +1069,7 @@ function update(){
     renderSettings(p.t, false);
   }
   renderSheet(p, pieces);
+  renderSplit(p, splitItems);
 }
 
 function setTabs(){
